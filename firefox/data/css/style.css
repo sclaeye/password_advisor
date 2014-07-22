@@ -1,0 +1,15 @@
+#questions{
+	display:none;
+}
+
+#advice{
+	display:none;
+}
+
+#passwordCreateHelp{
+	display:none;
+}
+
+.progress-bar-great-success {
+  background-color: #70e070;
+}
