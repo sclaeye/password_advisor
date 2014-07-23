@@ -1,18 +1,12 @@
 var current = "#mainMenu";
 var previous = "#mainMenu";
 var targetPassStrength;
-const veryWeakPassword = Math.pow(10, 8);
+const veryWeakPassword = Math.pow(10, 6);
 const weakPassword = Math.pow(36, 8);
-const strongPassword = Math.pow(62, 8);
-const veryStrongPassword = Math.pow(96, 8);
+const strongPassword = Math.pow(62, 10);
+const veryStrongPassword = Math.pow(95, 12);
 
-//Allows navigation to the create password screen
-$("#createButton").click(function() {
-	$("#mainMenu").hide();
-	$("#questions").show();
-	previous = current;
-	current = "#questions";
-});
+//Navigation bar listeners
 
 //Allows navigation back to the home page
 $("#homeButton").click(function() {
@@ -31,14 +25,37 @@ $("#previousButton").click(function() {
 	current = temp;
 });
 
+//Main menu listeners
+
+//main menu button listener to the create password screen
+$("#createButton").click(function() {
+	$("#mainMenu").hide();
+	$("#questions").show();
+	$("#improveTable").hide();
+	previous = current;
+	current = "#questions";
+});
+
+//main menu button listener to load existing password screen.
+$("#existAdviceButton").click(function() {
+	$("#mainMenu").hide();
+	$("#improvePass").show();
+	$("#advice").hide();
+	$("#improveTable").show();
+	previous = current;
+	current = "#improvePass";
+});
+
 //Shows the dynamically generated advice based on the user's questions
 $("#questionsButton").click(function() {
 	generateAdvice();
 	$(current).hide();
+	$("#improvePass").show();
 	$("#advice").show();
 	previous = current;
-	current = "#advice";
+	current = "#improvePass";
 });
+
 
 //Allows the password text to be toggled between hidden and clear text
 $("#showPasswordButton").click(function() {
@@ -69,49 +86,86 @@ $( "#inputPassword" ).on('input', function() {
 			break;
 	}
 	
-	//avoid continuing the calculation once the target has been reached
-	var calculated = calculateStrength();
-		
-	updateProgress((calculated/targetKeySpace) * 100);
+	//avoid continuing the calculation once the target has been reached		
+	updateProgress(calculateStrength());
 });
 
-function updateProgress(percent)
+function updateProgress(calculated)
 {
-	if (percent>100)
-		$("#progress-bar").attr("style","width: "+100+"%");
-	else
-		$("#progress-bar").attr("style","width: "+percent+"%");
-	if (percent<25)
-		$("#progress-bar").attr("class","progress-bar progress-bar-danger");
-	else if (percent<50)
-		$("#progress-bar").attr("class","progress-bar progress-bar-warning");
-	else if (percent<75)
-		$("#progress-bar").attr("class","progress-bar progress-bar-success");
-	else
-		$("#progress-bar").attr("class","progress-bar progress-bar-great-success");
+	var labelValue = 'Very Weak';
+	if ((calculated/veryWeakPassword) <= 1)		//is the password very weak?
+	{
+		$("#progress-bar-danger").attr("style","width: "+Math.ceil((((calculated/veryWeakPassword)*100)/4))+"%");
+		labelValue='Very Weak';
+	} else if ((calculated/veryWeakPassword)  > 1){
+		$("#progress-bar-danger").attr("style","width: "+25+"%");
+	}  
+	if ((calculated/weakPassword) <= 1 && (calculated/veryWeakPassword) > 1)		//is the password weak?
+	{
+		$("#progress-bar-warning").attr("style","width: "+Math.ceil((((calculated/weakPassword)*100)/4))+"%");
+		labelValue='Weak';
+	} else if ((calculated/weakPassword)  > 1){
+		$("#progress-bar-warning").attr("style","width: "+25+"%");
+	} else {
+		$("#progress-bar-warning").attr("style","width: "+0+"%");
+	}
+	if ((calculated/strongPassword) <= 1 && (calculated/weakPassword) > 1)		//is the password strong?
+	{
+		$("#progress-bar-success").attr("style","width: "+Math.ceil((((calculated/strongPassword)*100)/4))+"%");
+		labelValue='Strong';
+	} else if ((calculated/strongPassword) > 1){
+		$("#progress-bar-success").attr("style","width: "+25+"%");
+	} else {
+		$("#progress-bar-success").attr("style","width: "+0+"%");
+	}
+	if ((calculated/veryStrongPassword) <= 1 && (calculated/strongPassword) > 1)		//is the password very strong?
+	{
+		$("#progress-bar-great-success").attr("style","width: "+Math.ceil((((calculated/veryStrongPassword)*100)/4))+"%");
+		labelValue='Very Strong';
+	} else if ((calculated/veryStrongPassword) > 1){
+		$("#progress-bar-great-success").attr("style","width: "+25+"%");
+		labelValue='Very Strong';
+	} else {
+		$("#progress-bar-great-success").attr("style","width: "+0+"%");
+	}
+	$("#progress-label").html('The password is: '+labelValue);
 }
 
 function calculateStrength()
 {
 	var chr;
 	var hasLetter = 0;
+	var letterCount =0;
 	var hasNumber = 0;
+	var numberCount =0;
 	var hasSymbol = 0;
+	var symbolCount =0;
 	var hasUpper = 0;
+	var upperCount=0;
 	for (var i=0; i<$( "#inputPassword" ).val().length; i++)
 	{
 		chr = $( "#inputPassword" ).val().charAt(i);
-		if (isUpperCase(chr))
+		if (isUpperCase(chr)) {
 			hasUpper = 1;
-		else if (isLetter(chr))
+			upperCount++;
+		} else if (isLetter(chr)) {
 			hasLetter = 1;
-		else if (isNumber(chr))
+			letterCount++;
+		} else if (isNumber(chr)) {
 			hasNumber = 1;
-		else if (isSymbol(chr))
+			numberCount++;
+		} else if (isSymbol(chr)) {
 			hasSymbol = 1;
+			symbolCount++;
+		}
 	}
-	updateAdvice($( "#inputPassword" ).val().length, hasNumber, hasLetter, hasUpper, hasSymbol);
-	return Math.pow((hasLetter * 26) + (hasUpper * 26) + (hasNumber * 10) + (hasSymbol * 34),$( "#inputPassword" ).val().length);
+	
+	if ($( "#advice" ).attr('style') != 'display:none;')
+		updateAdvice($( "#inputPassword" ).val().length, hasNumber, hasLetter, hasUpper, hasSymbol);
+	if ($( "#improveTable" ).attr('style') != 'display:none;')
+		updateTable($( "#inputPassword" ).val().length, numberCount, letterCount, upperCount, symbolCount);
+		
+	return Math.pow((hasLetter * 26) + (hasUpper * 26) + (hasNumber * 10) + (hasSymbol * 33),$( "#inputPassword" ).val().length);
 }
 
 //Color codes the dynamically generated advice based on what attributes the new password incorporates
@@ -125,22 +179,30 @@ function updateAdvice(passLength, hasNumber, hasLetter, hasUpper, hasSymbol) {
 		$(adviceArray[0]).attr('class', 'text-success');
 	else
 		$(adviceArray[0]).attr('class', '');
+		
 	if (hasNumber==1 && adviceArray.length>=2)
 		$(adviceArray[1]).attr('class', 'text-success');
 	else
 		$(adviceArray[1]).attr('class', '');
+		
 	if (hasLetter==1 && adviceArray.length>=3)
-		$(adviceArray[1]).attr('class', 'text-success');
+		$(adviceArray[2]).attr('class', 'text-success');
 	else
-		$(adviceArray[1]).attr('class', '');
+		$(adviceArray[2]).attr('class', '');
+		
 	if (hasUpper==1 && adviceArray.length>=4)
-		$(adviceArray[1]).attr('class', 'text-success');
+		$(adviceArray[3]).attr('class', 'text-success');
 	else
-		$(adviceArray[1]).attr('class', '');
+		$(adviceArray[3]).attr('class', '');
+		
 	if (hasSymbol==1 && adviceArray.length>=5)
-		$(adviceArray[1]).attr('class', 'text-success');
+		$(adviceArray[4]).attr('class', 'text-success');
 	else
-		$(adviceArray[1]).attr('class', '');
+		$(adviceArray[4]).attr('class', '');
+}
+
+function updateTable(passLength, numberCount, letterCount, upperCount, symbolCount){
+	//TODO
 }
 
 function isLetter(chr){
@@ -187,6 +249,12 @@ function generateAdvice(){
     for (var i = 0; i < strengthAdvice.length-(targetPassStrength-1); i++) {
           $("#strengthList").append('<li>'+strengthAdvice[i]+'</li>');
     }
+	
+	$('#adviceMemorability').empty();
+	$('#adviceMemorability').append("<ul id='memList'></ul>");
+    for (var i = 0; i < memAdvice.length; i++) {
+          $("#memList").append('<li>'+memAdvice[i]+'</li>');
+    }
 }
 
 //A helper function which creates an array with all of the password advice related to
@@ -206,9 +274,10 @@ function createStrengthAdvice(){
 //password memorability
 function createMemorabilityAdvice(){
 	var passwordAdvice = new Array();
-	passwordAdvice.push("Use a phrase as the passwords source");
+	passwordAdvice.push("Use a phrase as the password's source");
 	passwordAdvice.push("Write down a cryptic clue that will allow you to remember the password");
 	passwordAdvice.push("Use a password similar to one of your existing passwords");
+	passwordAdvice.push("Use a shorter password with a full mixture of characters (upper and lower case letters, numbers, symbols");
 	return passwordAdvice;
 }
 

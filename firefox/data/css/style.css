@@ -1,8 +1,12 @@
+body{
+	background:#c8c7c7;
+}
+
 #questions{
 	display:none;
 }
 
-#advice{
+#improvePass{
 	display:none;
 }
 
@@ -10,6 +14,18 @@
 	display:none;
 }
 
+#improveTable{
+	display:none;
+}
+
+#improvePass{
+	display:none;
+}
+
 .progress-bar-great-success {
   background-color: #70e070;
+}
+
+.spacer {
+    margin-top: 5px;
 }

@@ -21,11 +21,7 @@
 					<button type="button" id="homeButton" class="btn btn-default navbar-btn">
 						<span class="glyphicon glyphicon-home"></span>
 					</button>
-					<button type="button" id="settingsButton" class="btn btn-default navbar-btn">
-						<span class="glyphicon glyphicon-cog"></span>
-					</button>
 				</div>
-
 			</div>
 		  </div>
 		</nav>
@@ -34,51 +30,49 @@
 	<div class="container-fluid">
 		<div class="row" id="mainMenu"> <!-- main menu -->
 			<div class="span7 text-center">
-					<h4> Advise me on: </h4>
+					<h5> Advise me on: </h5>
 					<div class="btn-group-vertical">
 					  <button type="button" id="createButton" class="btn btn-primary">A new password</button>
 					  <button type="button" id="existAdviceButton" class="btn btn-primary">An existing password</button>
+					  <button type="button" id="genAdviceButton" class="btn btn-primary">Good Practices</button>
 					</div>
-					
-					<div class="btn-group-vertical">
-					  <button type="button" id="setupButton" class="btn btn-primary">Setup</button>
-					</div>
-			</div> 
+			</div>
+								
 		</div> <!-- end of main menu -->
 			
 		<div class="row" id="questions"> <!-- Questions -->
-			<div class="col-md-offset-2 col-md-12">
+			<div class="col-xs-12">
 				<form class="form-horizontal" role="form">
-					<h4> What kind of data does this website store? </h4>
+					<h5> What kind of data does this website store? </h5>
 					<div class="row">
-						<div class="col-sm-offset-4 col-sm-12">
+						<div class="col-xs-offset-1 col-xs-10">
 							<div class="form-group">
 								<div class="radio">
-								  <label>
-									<input type="radio" name="optionsRadios1" id="optionsRadios1" value="0" checked>
-									Financial Information
-								  </label>
+									<label>
+										<input type="radio" name="optionsRadios1" id="optionsRadios1" value="0" checked>
+										Financial Information
+									</label>
 								</div>
 								<div class="radio">
-								  <label>
+									<label>
 									<input type="radio" name="optionsRadios1" id="optionsRadios2" value="1">
-									Personal Information
-								  </label>
+										Personal Information
+									</label>
 								</div>
 								<div class="radio">
-								  <label>
+									<label>
 									<input type="radio" name="optionsRadios1" id="optionsRadios3" value="2">
-									General Information
-								  </label>
+										General Information
+									</label>
 								</div>
 							</div>
 						</div>
 					</div>
 				</form>	
 				<form class="form-horizontal" role="form">
-					<h4> How often will you use this website? </h4>
+					<h5> How often will you use this website? </h5>
 					<div class="row">
-						<div class="col-sm-offset-4 col-sm-12">
+						<div class="col-xs-offset-1 col-xs-10">
 							<div class="form-group">
 								<div class="radio">
 								  <label>
@@ -101,43 +95,147 @@
 							</div>
 						</div>
 					</div>
-				</form>	
-		    </div> <!-- end of col -->
-			<div class="form-group">
-				<div class="col-sm-offset-8 col-sm-12">
-				  <button type="submit" id="questionsButton" class="btn btn-default">Submit</button>
-				</div>
-		    </div>
-		</div> <!-- end of questions -->
-		
-		<div class="row" id="advice"> <!-- start of advice -->
-			<div class="col-sm-offset-2 col-sm-12">
-				<h4>Your password should:</h4>
+				</form>
 				<div class="row">
-					<div class="col-sm-offset-2 col-sm-12" id="adviceStrength">
-
+					<div class="col-xs-offset-7 col-xs-3">
+						<div class="form-group">
+						  <button type="submit" id="questionsButton" class="btn btn-default">Submit</button>
+						</div>
 					</div>
 				</div>
-				<h4>What can I do to remember my new password more easily?</h4>
-				<div class="row">
-					<div class="col-sm-offset-2 col-sm-12" id="adviceMemorability">
+		    </div> <!-- end of col -->
 
+		</div> <!-- end of questions -->
+		
+		<div class="row" id="improvePass"> <!-- start of advice -->
+			<div class="col-xs-12">
+				<div class="row" id="advice">
+					<div class="col-xs-offset-1 col-xs-10">
+						<h5 id="aimFor"></h5>
+						<h5>Your password should:</h5>
+						<div class="row">
+							<div class="col-xs-10" id="adviceStrength">
+
+							</div>
+						</div>
+						<h5>What can I do to remember my new password more easily?</h5>
+						<div class="row">
+							<div class="col-xs-10" id="adviceMemorability">
+
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-xs-offset-1 col-xs-10">
+						<label for="inputPassword">Enter your new password:</label>
+						<form class="form-inline" role="form">
+							<div class="form-group">
+								<div class="input-group">
+								  <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+								</div>
+								<button type="button" id="showPasswordButton" class="btn btn-default">
+									<span class="glyphicon glyphicon-eye-open"></span>
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-xs-offset-1 col-xs-10">
+						<div class="text-center" id="progress-label">The password is: Very Weak</div>
+						<div class="progress">
+							<div class="progress-bar progress-bar-danger" id="progress-bar-danger"></div>
+							<div class="progress-bar progress-bar-warning" id="progress-bar-warning"></div>
+							<div class="progress-bar progress-bar-success" id="progress-bar-success"></div>
+							<div class="progress-bar progress-bar-great-success" id="progress-bar-great-success"></div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="row" id="improveTable"> <!-- start of table -->
+					<div class="col-xs-offset-1 col-xs-10">
+						<div class="panel panel-default">
+							<div class="panel-heading">Password Strength Properties</div>
+							<!-- Table -->
+							<table class="table">
+								<tr>
+								  <th>Property</th>
+								  <th># of Occurrences</th>
+								  <th>Comments</th>
+								</tr>
+								<tr>
+								  <td>Password length</td>
+								  <td> </td>
+								  <td> </td>
+								</tr>
+								<tr>
+								  <td>Numbers</td>
+								  <td>  </td>
+								  <td> </td>
+								</tr>
+								<tr>
+								  <td>Lower Case Letters</td>
+								  <td>  </td>
+								  <td> </td>
+								</tr>
+								<tr>
+								  <td>Upper Case letters</td>
+								  <td>  </td>
+								  <td> </td>
+								</tr>
+								<tr>
+								  <td>Special Characters</td>
+								  <td>  </td>
+								  <td> </td>
+								</tr>
+
+							</table>
+						</div>
+						<div class="panel panel-default">
+							<div class="panel-heading">Password Choice Properties</div>
+							<!-- Table -->
+							<table class="table">
+								<tr>
+								  <th>Property</th>
+								  <th>Occurrence</th>
+								  <th>Comments</th>
+								</tr>
+							    <tr>
+								  <td>In the TOP 10000 password</td>
+								  <td>  </td>
+								  <td> </td>
+								</tr>
+								<tr>
+								  <td>Contains a dictionary word</td>
+								  <td>  </td>
+								  <td> </td>
+								</tr>
+							</table>
+						</div>
+						<div class="panel panel-default">
+							<div class="panel-heading">Time Taken to Crack Using Brute Force</div>
+							<!-- Table -->
+							<table class="table">
+								<tr>
+								  <th>Machine</th>
+								  <th>Time</th>
+								</tr>
+							    <tr>
+								  <td>Standard CPU (2Ghz, single core)</td>
+								  <td>  </td>
+								</tr>
+								<td>Fast CPU (3.7Ghz, quad core)</td>
+								  <td>  </td>
+								</tr>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>
-			
-			<div class="form-group">
-				<label for="inputPassword">Enter your new password</label>
-				<input type="password" class="form-control" id="inputPassword" placeholder="Password">
-				<button type="button" id="showPasswordButton" class="btn btn-default navbar-btn">
-					<span class="glyphicon glyphicon-eye-open"></span>
-				</button>
-			  </div>
-				<div class="progress">
-					<div class="progress-bar progress-bar-danger" id="progress-bar"></div>
-				</div>
-			
-		</div>		
+		</div>
 	</div> <!-- end of container -->
 
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
