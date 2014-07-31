@@ -2,8 +2,8 @@
   "name": "password_advisor",
   "title": "Password Advisor",
   "id": "jid1-qbtnWI1AMkUqIw",
-  "description": "a password advice addon which will assist users in creating new passwords.",
+  "description": "A password advice addon which will assist users in creating new passwords.",
   "author": "Simon Claeye",
   "license": "MPL 2.0",
-  "version": "0.1"
+  "version": "1.0"
 }

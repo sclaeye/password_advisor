@@ -1,4 +1,6 @@
 var buttons = require('sdk/ui/button/action');
+var tabs = require("sdk/tabs");
+var tab;
 const { Sidebar } = require('sdk/ui');
 
 var button = buttons.ActionButton({
@@ -17,18 +19,25 @@ function onOpen(state) {
 }
 
 let sidebar = Sidebar({
-  id: 'sidebar-box',
-  title: 'Password Advice',
-  url: require("sdk/self").data.url("index.html"),
-  onAttach: function (worker) {
-	console.log(window.top.document.getElementById("sidebar-box").width);
-    }
+	id: 'sidebar-box',
+	title: 'Password Advisor',
+	url: require("sdk/self").data.url("index.html"),
+	onReady: function (worker) {
+	//message functions to be used to manage inter sidebar page navigation
+		worker.port.on("goFull", function() {
+		  tabs.open({
+			url: require("sdk/self").data.url("index.html"),
+			onOpen: function(thisTab){
+				tab = thisTab;
+				tab.on('close', onOpen);
+			},
+			onClose: function(){
+				worker.port.emit("tabClosed");
+			}
+		  });
+		});
+		worker.port.on("goMin", function() {
+		  tab.close();
+		});
+	}
 });
-
-
-
-
-
-
-
-

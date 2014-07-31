@@ -1,12 +1,26 @@
 var current = "#mainMenu";
 var previous = "#mainMenu";
 var targetPassStrength;
-const veryWeakPassword = Math.pow(10, 6);
+const veryWeakPassword = Math.pow(26, 6);
 const weakPassword = Math.pow(36, 8);
 const strongPassword = Math.pow(62, 10);
 const veryStrongPassword = Math.pow(95, 12);
 
 //Navigation bar listeners
+
+//because of security can't interact with addon from page script
+if (window.addon == undefined) {	//use as check to see if we're in the sidebar or in a tab
+	$("#fullButton").hide();
+	$("#minButton").hide();
+}
+
+//tab navigation
+if (window.addon != undefined) {	//use as check to see if we're in the sidebar or in a tab
+	addon.port.on("tabClosed", function() {
+		$("#minButton").hide();
+		$("#fullButton").show();
+		});
+}
 
 //Allows navigation back to the home page
 $("#homeButton").click(function() {
@@ -14,6 +28,10 @@ $("#homeButton").click(function() {
 	$("#mainMenu").show();
 	previous = current;
 	current = "#mainMenu";
+	
+	//reset password field and clear the password meter
+	$("#inputPassword").val("");
+	updateProgress(0);
 });
 
 //Allows the user to step back by 1 in the navigation order
@@ -23,6 +41,25 @@ $("#previousButton").click(function() {
 	var temp = previous
 	previous = current;
 	current = temp;
+});
+
+//Allows the user to open the html page in a new tab
+$("#fullButton").click(function() {
+	if (window.addon !== undefined)
+		window.addon.port.emit("goFull");
+	
+	$("#fullButton").hide();
+	$("#minButton").show();
+	
+});
+
+$("#minButton").click(function() {
+	if (addon !== undefined)
+		addon.port.emit("goMin");
+
+	$("#fullButton").show();
+	$("#minButton").hide();
+	
 });
 
 //Main menu listeners
@@ -56,16 +93,6 @@ $("#questionsButton").click(function() {
 	current = "#improvePass";
 });
 
-
-//Allows the password text to be toggled between hidden and clear text
-$("#showPasswordButton").click(function() {
-	$(document).ready(function() {
-		if ($('#inputPassword').attr('type')=='password')
-			$('#inputPassword').attr('type', 'text');
-		else
-			$('#inputPassword').attr('type', 'password');
-	});
-});
 
 //Detects a keypress from the password field
 $( "#inputPassword" ).on('input', function() {
@@ -160,11 +187,11 @@ function calculateStrength()
 		}
 	}
 	
-	if ($( "#advice" ).attr('style') != 'display:none;')
+	if ($( "#advice" ).attr('style') != 'display: none;')
 		updateAdvice($( "#inputPassword" ).val().length, hasNumber, hasLetter, hasUpper, hasSymbol);
-	if ($( "#improveTable" ).attr('style') != 'display:none;')
+	if ($( "#improveTable" ).attr('style') != 'display: none;')
 		updateTable($( "#inputPassword" ).val().length, numberCount, letterCount, upperCount, symbolCount);
-		
+	
 	return Math.pow((hasLetter * 26) + (hasUpper * 26) + (hasNumber * 10) + (hasSymbol * 33),$( "#inputPassword" ).val().length);
 }
 
@@ -180,12 +207,12 @@ function updateAdvice(passLength, hasNumber, hasLetter, hasUpper, hasSymbol) {
 	else
 		$(adviceArray[0]).attr('class', '');
 		
-	if (hasNumber==1 && adviceArray.length>=2)
+	if (hasLetter==1 && adviceArray.length>=2)
 		$(adviceArray[1]).attr('class', 'text-success');
 	else
 		$(adviceArray[1]).attr('class', '');
 		
-	if (hasLetter==1 && adviceArray.length>=3)
+	if (hasNumber==1 && adviceArray.length>=3)
 		$(adviceArray[2]).attr('class', 'text-success');
 	else
 		$(adviceArray[2]).attr('class', '');
@@ -201,8 +228,144 @@ function updateAdvice(passLength, hasNumber, hasLetter, hasUpper, hasSymbol) {
 		$(adviceArray[4]).attr('class', '');
 }
 
-function updateTable(passLength, numberCount, letterCount, upperCount, symbolCount){
-	//TODO
+function updateTable(passLength, numberCount, letterCount, upperCount, symbolCount){	
+	//Password strength properties
+	//Values
+	$("#table-hasLength").empty();
+	$("#table-hasLength").append(passLength);
+	
+	$("#table-hasNum").empty();
+	$("#table-hasNum").append(numberCount);
+
+	$("#table-hasLetter").empty();
+	$("#table-hasLetter").append(letterCount);
+	
+	$("#table-hasUpper").empty();
+	$("#table-hasUpper").append(upperCount);
+	
+	$("#table-hasSpec").empty();
+	$("#table-hasSpec").append(symbolCount);
+	
+	//Comments
+	updateComments(passLength, numberCount, letterCount, upperCount, symbolCount)
+	
+	//Password Choice properties
+	
+	updateTableTimeToCrack(passLength, numberCount, letterCount, upperCount, symbolCount);
+}
+
+function updateComments(passLength, numberCount, letterCount, upperCount, symbolCount){
+	if (passLength<8) {
+		$("#table-lengthComments").empty();
+		$("#table-lengthComments").append("Aim for a password that is at least 8 characters long!");
+		$("#table-lengthComments").attr('class', 'text-danger');
+	} else {
+		$("#table-lengthComments").empty();
+		$("#table-lengthComments").append("More than 8 characters long.");
+		$("#table-lengthComments").attr('class', 'text-success');
+	}
+	
+	if (numberCount>0) {
+		$("#table-numComment").empty();
+		$("#table-numComment").append("Contains at least 1 digit");
+		$("#table-numComment").attr('class', 'text-success');
+	} else {
+		$("#table-numComment").empty();
+		$("#table-numComment").append("Should contain at least 1 digit!");
+		$("#table-numComment").attr('class', 'text-danger');
+	}
+	
+	if (letterCount>0) {
+		$("#table-letterComment").empty();
+		$("#table-letterComment").append("Contains at least 1 lower case letter");
+		$("#table-letterComment").attr('class', 'text-success');
+	} else {
+		$("#table-letterComment").empty();
+		$("#table-letterComment").append("Should contain at least 1 lower case letter!");
+		$("#table-letterComment").attr('class', 'text-danger');
+	}
+	
+	if (upperCount>0) {
+		$("#table-upperComment").empty();
+		$("#table-upperComment").append("Contains at least 1 upper case letter");
+		$("#table-upperComment").attr('class', 'text-success');
+	} else {
+		$("#table-upperComment").empty();
+		$("#table-upperComment").append("Should contain at least 1 upper case letter!");
+		$("#table-upperComment").attr('class', 'text-danger');
+	}
+
+	if (symbolCount>0) {
+		$("#table-specComment").empty();
+		$("#table-specComment").append("Contains at least 1 special case letter");
+		$("#table-specComment").attr('class', 'text-success');
+	} else {
+		$("#table-specComment").empty();
+		$("#table-specComment").append("Should contain at least 1 special case letter!");
+		$("#table-specComment").attr('class', 'text-danger');
+	}
+}
+
+function updateTableTimeToCrack(passLength, numberCount, letterCount, upperCount, symbolCount) {
+	//Time Taken to Crack Using Brute Force
+	var hasNumber = 0;
+	var hasLetter = 0;
+	var hasUpper = 0;
+	var hasSymbol = 0;
+	
+	if (numberCount>0)
+		hasNumber = 1;
+	if (letterCount>0)
+		hasLetter =1;
+	if (upperCount>0)
+		hasUpper =1;
+	if (symbolCount>0)
+		hasSymbol=1;
+	
+	var passKeySpace = Math.pow(((hasLetter * 26) + (hasUpper * 26) + (hasNumber * 10) + (hasSymbol * 33)), passLength);
+	
+	//calculated as instructions per second
+	//standard 2.0GHz, 1 core
+	//fast 3.7Ghz, 4 cores
+	
+	var standardPc = passKeySpace/2000000000; //time needed in seconds
+	var fastPc = passKeySpace/(4*(3700000000));
+	
+	$("#table-bruteStandard").empty();
+	$("#table-bruteStandard").append(getTimeLong(standardPc));
+	
+	$("#table-bruteFast").empty();
+	$("#table-bruteFast").append(getTimeLong(fastPc));
+}
+
+function getTimeLong(timeInSecs)
+{
+	var mins = timeInSecs/60;
+	var hours = mins/60;
+	var days = hours/24;
+	var years = days/365;
+	
+	//Math.floor
+	mins = Math.floor(mins);
+	hours = Math.floor(hours);
+	days = Math.floor(days);
+	years = Math.floor(years);
+	
+	var time="";
+	if (years>0)
+		time = years.toFixed(0)+" years, ";
+	if (days>0)
+		time += (days%365).toFixed(0) + " days, ";
+	if (hours>0)
+		time += (hours%24).toFixed(0) + " hours, ";
+	if (mins>0)
+		time += (mins%60).toFixed(0) + " minutes, ";
+	if ((timeInSecs%60)<1)
+		time += " <1 second ";
+	else
+		time += (timeInSecs%60).toFixed(2) + " seconds";
+	
+	return time;
 }
 
 function isLetter(chr){
@@ -255,6 +418,23 @@ function generateAdvice(){
     for (var i = 0; i < memAdvice.length; i++) {
           $("#memList").append('<li>'+memAdvice[i]+'</li>');
     }
+	
+	//set what password strength we should aim for
+	$("#aimFor").empty();
+	switch(targetPassStrength) {
+		case 1:	//Very strong
+			$("#aimFor").append("Password strength to aim for: Very Strong");
+			break;
+		case 2:	//Strong
+			$("#aimFor").append("Password strength to aim for: Strong");
+			break;
+		case 3:	//Weak
+			$("#aimFor").append("Password strength to aim for: Very Weak");
+			break;
+		case 4:	//Very Weak
+			$("#aimFor").append("Password strength to aim for: Weak");
+			break;
+	}
 }
 
 //A helper function which creates an array with all of the password advice related to
@@ -263,8 +443,8 @@ function createStrengthAdvice(){
 	var passwordAdvice = new Array();
 	//Strength advice
 	passwordAdvice.push("Be at least 8 characters long");
-	passwordAdvice.push("Contain numbers");
 	passwordAdvice.push("Contain lower case letters");
+	passwordAdvice.push("Contain numbers");
 	passwordAdvice.push("Contain upper case letters");
 	passwordAdvice.push("Contain symbols");
 	return passwordAdvice;
@@ -277,7 +457,7 @@ function createMemorabilityAdvice(){
 	passwordAdvice.push("Use a phrase as the password's source");
 	passwordAdvice.push("Write down a cryptic clue that will allow you to remember the password");
 	passwordAdvice.push("Use a password similar to one of your existing passwords");
-	passwordAdvice.push("Use a shorter password with a full mixture of characters (upper and lower case letters, numbers, symbols");
+	passwordAdvice.push("Use a shorter password but use a full mixture of characters (upper and lower case letters, numbers, symbols.");
 	return passwordAdvice;
 }
 
