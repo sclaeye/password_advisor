@@ -5,6 +5,20 @@ const veryWeakPassword = Math.pow(26, 6);
 const weakPassword = Math.pow(36, 8);
 const strongPassword = Math.pow(62, 10);
 const veryStrongPassword = Math.pow(95, 12);
+var dictionaries = new Array();
+var filesLoaded = false;
+
+var commonDict;
+var commonLoaded = false;
+var johnDict;
+var johnLoaded = false;
+var cainDict;
+var cainLoaded = false;
+var rockyouDict;
+var rockyouLoaded = false;
+
+var barChart;
+var lineChart;
 
 //Navigation bar listeners
 
@@ -68,7 +82,7 @@ $("#minButton").click(function() {
 $("#createButton").click(function() {
 	$("#mainMenu").hide();
 	$("#questions").show();
-	$("#improveTable").hide();
+	$("#improve").hide();
 	previous = current;
 	current = "#questions";
 });
@@ -78,7 +92,7 @@ $("#existAdviceButton").click(function() {
 	$("#mainMenu").hide();
 	$("#improvePass").show();
 	$("#advice").hide();
-	$("#improveTable").show();
+	$("#improve").show();
 	previous = current;
 	current = "#improvePass";
 });
@@ -93,7 +107,59 @@ $("#questionsButton").click(function() {
 	current = "#improvePass";
 });
 
+//Shows the improvement tables
+$("#tablesTab").click(function() {
+	$("#tablesTab").attr('class', 'active');
+	$("#graphsTab").attr('class', '');
+	$("#improveGraphs").hide();
+	$("#improveTables").show();
+});
 
+//Shows the improvement graphs
+$("#graphsTab").click(function() {
+	$("#graphsTab").attr('class', 'active');
+	$("#tablesTab").attr('class', '');
+	$("#improveTables").hide();
+	$("#improveGraphs").show();
+	initGraphs();
+});
+
+//Tooltips
+$(".computerSpeedNormal").tooltip({
+        placement : 'top',
+		container: 'body',
+		title:"A standard computer with a single core (2Ghz) processor"});
+	
+$(".computerSpeedFast").tooltip({
+        placement : 'top',
+		container: 'body',
+		title:"A fast computer with a quad core(3.7Ghz each) processor"});
+	
+$(".attackTypeBrute").tooltip({
+        placement : 'top',
+		container: 'body',
+		title:"A brute force attack requires the computer to try all character combinations"});
+
+$(".attackTypeDictTop").tooltip({
+        placement : 'top',
+		container: 'body',
+		title:"A dictionary containing the 10'000 most frequently used passwords"});
+
+$(".attackTypeDictJohn").tooltip({
+        placement : 'top',
+		container: 'body',
+		title:"A dictionary commonly used by password cracking software"});
+		
+$(".attackTypeDictCain").tooltip({
+        placement : 'top',
+		container: 'body',
+		title:"A larger dictionary commonly used by password cracking software"});
+		
+$(".attackTypeDictRock").tooltip({
+        placement : 'top',
+		container: 'body',
+		title:"A dictionary of passwords that have been leaked or stolen"});		
+		
 //Detects a keypress from the password field
 $( "#inputPassword" ).on('input', function() {
 	var targetKeySpace;
@@ -115,6 +181,9 @@ $( "#inputPassword" ).on('input', function() {
 	
 	//avoid continuing the calculation once the target has been reached		
 	updateProgress(calculateStrength());
+	
+	if (!filesLoaded)	//load dictionary attack files if not already loaded
+		loadFiles();
 });
 
 function updateProgress(calculated)
@@ -189,8 +258,10 @@ function calculateStrength()
 	
 	if ($( "#advice" ).attr('style') != 'display: none;')
 		updateAdvice($( "#inputPassword" ).val().length, hasNumber, hasLetter, hasUpper, hasSymbol);
-	if ($( "#improveTable" ).attr('style') != 'display: none;')
-		updateTable($( "#inputPassword" ).val().length, numberCount, letterCount, upperCount, symbolCount);
+	if ($( "#improveTables" ).attr('style') != 'display: none;')
+		updateTable($( "#inputPassword" ).val(), numberCount, letterCount, upperCount, symbolCount);
+	if ($( "#improveGraphs" ).attr('style') != 'display: none;')
+		updateGraphs(numberCount, letterCount, upperCount, symbolCount);
 	
 	return Math.pow((hasLetter * 26) + (hasUpper * 26) + (hasNumber * 10) + (hasSymbol * 33),$( "#inputPassword" ).val().length);
 }
@@ -228,11 +299,11 @@ function updateAdvice(passLength, hasNumber, hasLetter, hasUpper, hasSymbol) {
 		$(adviceArray[4]).attr('class', '');
 }
 
-function updateTable(passLength, numberCount, letterCount, upperCount, symbolCount){	
+function updateTable(pass, numberCount, letterCount, upperCount, symbolCount){	
 	//Password strength properties
 	//Values
 	$("#table-hasLength").empty();
-	$("#table-hasLength").append(passLength);
+	$("#table-hasLength").append(pass.length);
 	
 	$("#table-hasNum").empty();
 	$("#table-hasNum").append(numberCount);
@@ -247,11 +318,11 @@ function updateTable(passLength, numberCount, letterCount, upperCount, symbolCou
 	$("#table-hasSpec").append(symbolCount);
 	
 	//Comments
-	updateComments(passLength, numberCount, letterCount, upperCount, symbolCount)
+	updateComments(pass.length, numberCount, letterCount, upperCount, symbolCount)
 	
-	//Password Choice properties
-	
-	updateTableTimeToCrack(passLength, numberCount, letterCount, upperCount, symbolCount);
+	//Attack table
+	updateTableBruteTimeToCrack(pass.length, numberCount, letterCount, upperCount, symbolCount);
+	updateTableDictionaryAttacks();
 }
 
 function updateComments(passLength, numberCount, letterCount, upperCount, symbolCount){
@@ -306,8 +377,33 @@ function updateComments(passLength, numberCount, letterCount, upperCount, symbol
 	}
 }
 
-function updateTableTimeToCrack(passLength, numberCount, letterCount, upperCount, symbolCount) {
-	//Time Taken to Crack Using Brute Force
+function updateTableBruteTimeToCrack(passLength, numberCount, letterCount, upperCount, symbolCount) {
+	var passKeySpace = calcBruteKeySpace(passLength, numberCount, letterCount, upperCount, symbolCount);
+	
+	//calculated as instructions per second
+	//standard 2.0GHz, 1 core
+	//fast 3.7Ghz, 4 cores
+	
+	var standardPc = passKeySpace/2000000000; //time needed in seconds
+	var fastPc = passKeySpace/(4*(3700000000));
+	
+	$("#table-bruteNormal").empty();
+	$("#table-bruteNormal").append(getTimeLong(standardPc));
+	if (standardPc<1)
+		$("#table-rockNormal").attr('class', 'text-danger');
+	else
+		$("#table-rockNormal").attr('class', '');
+	
+	$("#table-bruteFast").empty();
+	$("#table-bruteFast").append(getTimeLong(fastPc));
+	if (fastPc<1)
+		$("#table-rockNormal").attr('class', 'text-danger');
+	else
+		$("#table-rockNormal").attr('class', '');
+}
+
+function calcKeySpace(passLength, numberCount, letterCount, upperCount, symbolCount){
+//Time Taken to Crack Using Brute Force
 	var hasNumber = 0;
 	var hasLetter = 0;
 	var hasUpper = 0;
@@ -322,20 +418,7 @@ function updateTableTimeToCrack(passLength, numberCount, letterCount, upperCount
 	if (symbolCount>0)
 		hasSymbol=1;
 	
-	var passKeySpace = Math.pow(((hasLetter * 26) + (hasUpper * 26) + (hasNumber * 10) + (hasSymbol * 33)), passLength);
-	
-	//calculated as instructions per second
-	//standard 2.0GHz, 1 core
-	//fast 3.7Ghz, 4 cores
-	
-	var standardPc = passKeySpace/2000000000; //time needed in seconds
-	var fastPc = passKeySpace/(4*(3700000000));
-	
-	$("#table-bruteStandard").empty();
-	$("#table-bruteStandard").append(getTimeLong(standardPc));
-	
-	$("#table-bruteFast").empty();
-	$("#table-bruteFast").append(getTimeLong(fastPc));
+	return Math.pow(((hasLetter * 26) + (hasUpper * 26) + (hasNumber * 10) + (hasSymbol * 33)), passLength);
 }
 
 function getTimeLong(timeInSecs)
@@ -479,3 +562,333 @@ function createAdviceMatrix(){
  	adviceMatrix[2][2]= 4;
 	return adviceMatrix;
 }
+
+function loadFiles() {
+	$.ajax({
+		url : 'media/most_common.txt',
+		dataType: "text",
+		success : function (data) {
+			commonDict = fileDataToArray(data);
+			commonLoaded = true;
+		}
+	});
+	$.ajax({
+		url : 'media/john.txt',
+		dataType: "text",
+		success : function (data) {
+			johnDict = fileDataToArray(data);
+			johnLoaded = true;
+		}
+	});
+	$.ajax({
+		url : 'media/cain.txt',
+		dataType: "text",
+		success : function (data) {
+			cainDict = fileDataToArray(data);
+			cainLoaded = true;
+		}
+	});
+	$.ajax({
+		url : 'media/rockyou.txt',
+		dataType: "text",
+		success : function (data) {
+			rockyouDict = fileDataToArray(data);
+			rockyouLoaded = true;
+		}
+	});
+	filesLoaded = true;
+}
+
+//helper function that allows for a local text file to be read into a multi-dimensional array
+function readFile(fileName){
+	var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", fileName, false);
+    rawFile.onreadystatechange = function ()
+    {
+        if(rawFile.readyState === 4)
+        {
+			//check for 0 since no http status will be sent as the file is local
+            if(rawFile.status === 200 || rawFile.status == 0)	
+            {
+				dictionaries.push(fileDataToArray(rawFile.responseText));
+				console.log(dictionaries);
+            }
+        }
+    }
+	rawFile.send(null);
+}
+
+//Helper function that takes a loaded file and places the text into a multi-dimensional array
+function fileDataToArray(fileData) {
+	var data = fileData.split("\n");
+	var textArray = new Array();
+	var arrayLength = 0;
+	var dataLength = 0;
+	for (var i=0; i<data.length; i++)
+	{
+		arrayLength = textArray.length;
+		dataLength= data[i].length-1;	//word still has the \n character at the end
+		
+		//create a new array such that all words of the same
+		//length are in the same array and can be found at textArray[wordLength-1]
+		if (arrayLength < dataLength)
+		{
+			for (var j=0; j< (dataLength - arrayLength ); j++)
+			{
+				textArray.push(new Array());
+			}
+			textArray[dataLength-1].push(data[i].substring(0,dataLength)); 
+		}
+		else if (dataLength>0)
+			textArray[dataLength-1].push(data[i].substring(0,dataLength)); 
+	}
+	return textArray;
+}
+
+//function to determine if the word is in the dictionary
+function inDictionary(word, dict){
+	var wordLength = word.length;
+	if (wordLength > 0) {
+		var lengthArray = dict[wordLength-1];
+		if (lengthArray.length > 1) {
+			for (var i=0; i<lengthArray.length; i++) {
+				if (lengthArray[i] == word) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+//function to update the table with the password attack information
+function updateTableDictionaryAttacks() {
+	var pass = $("#inputPassword" ).val();
+	//Top 10'000
+	if (commonLoaded) {
+		if (inDictionary(pass, commonDict)) {
+			var standardPc = 10000/2000000000;	//top 10'000 has 10'0000 words in its dictionary
+			var fastPc = 10000/(4*(3700000000));
+				
+			$("#table-topNormal").empty();
+			$("#table-topNormal").append(getTimeLong(standardPc));
+			$("#table-topNormal").attr('class', 'text-danger');
+				
+			$("#table-topFast").empty();
+			$("#table-topFast").append(getTimeLong(fastPc));
+			$("#table-topFast").attr('class', 'text-danger');
+		} else {
+			$("#table-topNormal").empty();
+			$("#table-topNormal").append("Not in dictionary");
+			$("#table-topNormal").attr('class', 'text-success');
+				
+			$("#table-topFast").empty();
+			$("#table-topFast").append("Not in dictionary");
+			$("#table-topFast").attr('class', 'text-success');
+		}
+	} else {
+			$("#table-topNormal").empty();
+			$("#table-topNormal").append("Loading Dictionary");
+			$("#table-topNormal").attr('class', 'text-primary');
+				
+			$("#table-topFast").empty();
+			$("#table-topFast").append("Loading Dictionary");
+			$("#table-topFast").attr('class', 'text-primary');
+	}
+	//John the Ripper
+	if (johnLoaded) {
+		if (inDictionary(pass, johnDict)) {
+			var standardPc = 3107/2000000000;	//john the ripper has 3107 words in its dictionary
+			var fastPc = 3107/(4*(3700000000));
+				
+			$("#table-johnNormal").empty();
+			$("#table-johnNormal").append(getTimeLong(standardPc));
+			$("#table-johnNormal").attr('class', 'text-danger');
+				
+			$("#table-johnFast").empty();
+			$("#table-johnFast").append(getTimeLong(fastPc));
+			$("#table-johnFast").attr('class', 'text-danger');
+		} else {
+			$("#table-johnNormal").empty();
+			$("#table-johnNormal").append("Not in dictionary");
+			$("#table-johnNormal").attr('class', 'text-success');
+				
+			$("#table-johnFast").empty();
+			$("#table-johnFast").append("Not in dictionary");
+			$("#table-johnFast").attr('class', 'text-success');
+		}
+	} else {
+			$("#table-johnNormal").empty();
+			$("#table-johnNormal").append("Loading Dictionary");
+			$("#table-johnNormal").attr('class', 'text-primary');
+				
+			$("#table-johnFast").empty();
+			$("#table-johnFast").append("Loading Dictionary");
+			$("#table-johnFast").attr('class', 'text-primary');
+	}
+	//John the Ripper
+	if (cainLoaded) {
+		if (inDictionary(pass, cainDict)) {
+			var standardPc = 306706/2000000000;	//cain & abel has 306706 words in its dictionary
+			var fastPc = 306706/(4*(3700000000));
+				
+			$("#table-cainNormal").empty();
+			$("#table-cainNormal").append(getTimeLong(standardPc));
+			$("#table-cainNormal").attr('class', 'text-danger');
+				
+			$("#table-cainFast").empty();
+			$("#table-cainFast").append(getTimeLong(fastPc));
+			$("#table-cainFast").attr('class', 'text-danger');
+		} else {
+			$("#table-cainNormal").empty();
+			$("#table-cainNormal").append("Not in dictionary");
+			$("#table-cainNormal").attr('class', 'text-success');
+				
+			$("#table-cainFast").empty();
+			$("#table-cainFast").append("Not in dictionary");
+			$("#table-cainFast").attr('class', 'text-success');
+		}
+	} else {
+			$("#table-cainNormal").empty();
+			$("#table-cainNormal").append("Loading Dictionary");
+			$("#table-cainNormal").attr('class', 'text-primary');
+				
+			$("#table-cainFast").empty();
+			$("#table-cainFast").append("Loading Dictionary");
+			$("#table-cainFast").attr('class', 'text-primary');
+	}
+	//John the Ripper
+	if (rockyouLoaded) {
+		if (inDictionary(pass, rockyouDict)) {
+			var standardPc = 14344383/2000000000;	//rock you has 14344383 words in its dictionary
+			var fastPc = 14344383/(4*(3700000000));
+				
+			$("#table-rockNormal").empty();
+			$("#table-rockNormal").append(getTimeLong(standardPc));
+			$("#table-rockNormal").attr('class', 'text-danger');
+				
+			$("#table-rockFast").empty();
+			$("#table-rockFast").append(getTimeLong(fastPc));
+			$("#table-rockFast").attr('class', 'text-danger');
+		} else {
+			$("#table-rockNormal").empty();
+			$("#table-rockNormal").append("Not in dictionary");
+			$("#table-rockNormal").attr('class', 'text-success');
+				
+			$("#table-rockFast").empty();
+			$("#table-rockFast").append("Not in dictionary");
+			$("#table-rockFast").attr('class', 'text-success');
+		}
+	} else {
+			$("#table-rockNormal").empty();
+			$("#table-rockNormal").append("Loading Dictionary");
+			$("#table-rockNormal").attr('class', 'text-primary');
+				
+			$("#table-rockFast").empty();
+			$("#table-rockFast").append("Loading Dictionary");
+			$("#table-rockFast").attr('class', 'text-primary');
+	}
+}
+
+function initGraphs(){
+	initBarChart();
+	initLineChart();
+}
+
+function initBarChart(){
+	barChart = new Highcharts.Chart({
+        chart: {
+			renderTo: 'passbBarChart',
+            type: 'column'
+        },
+        title: {
+            text: 'Password Strength Properties'
+        },
+        xAxis: {
+            categories: ["Numbers", "Lower Case Letters", "Upper Case Letters", "Special Characters"]
+        },
+        yAxis: {
+			min: 0,
+            title: {
+                text: 'Number of Occurences'
+            }
+        },
+        series: [{
+            name: 'Password',
+            data: [0, 0, 0,0]
+        }]
+    });
+}
+
+function initLineChart(){
+	    lineChart = new Highcharts.Chart({
+        chart: {
+			renderTo: 'passLineChart',
+            type: 'line'
+        },
+        title: {
+            text: 'Time Needed to Hack'
+        },
+        xAxis: {
+			title: {
+                    text: 'Time'
+                }
+        },
+        yAxis: {
+            title: {
+                text: 'Number of Occurences'
+            },
+			min:0
+        },
+		legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle',
+            borderWidth: 0
+        },
+        series: [{
+            name: 'Brute Force',
+            data: [0]
+        }, {
+            name: "Dictionary - top 10'000 passwords",
+            data: [0]
+        }, {
+            name: "Dictionary - John The Ripper",
+            data: [0]
+        }, {
+            name: "Dictionary - Cain & Abel",
+            data: [0]
+        }, {
+            name: "Dictionary - Rock You",
+            data: [0]
+        } ]
+    });
+}
+
+function updateGraphs(numberCount, letterCount, upperCount, symbolCount) {
+	updateBarChart(numberCount, letterCount, upperCount, symbolCount);
+	updateLineChart(numberCount, letterCount, upperCount, symbolCount);
+}
+
+function updateBarChart(numberCount, letterCount, upperCount, symbolCount){
+	barChart.series[0].data[0].update(y  = numberCount);
+	barChart.series[0].data[1].update(y  = letterCount);
+	barChart.series[0].data[2].update(y  = upperCount);
+	barChart.series[0].data[3].update(y  = symbolCount);
+}
+
+function updateLineChart(numberCount, letterCount, upperCount, symbolCount){
+	var keySpace = calcKeySpace(numberCount, letterCount, upperCount, symbolCount);
+	
+	var standardPc = keySpace/2000000000; //time needed in seconds
+	
+	lineChart.series[0].addPoint([keySpace, standardPc]);
+	//lineChart.series[0].data[1].update(y  = letterCount);
+	//lineChart.series[0].data[2].update(y  = upperCount);
+	//lineChart.series[0].data[3].update(y  = symbolCount);
+	lineChart.redraw();
+}
+
+//Math.ceil((((calculated/veryWeakPassword)*100)/4))
+//	var standardPc = passKeySpace/2000000000; //time needed in seconds
+//	var fastPc = passKeySpace/(4*(3700000000));

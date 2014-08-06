@@ -26,6 +26,10 @@ body{
 	display: none;
 }
 
+#improveGraphs{
+	display: none;
+}
+
 .progress-bar-great-success {
   background-color: #70e070;
 }

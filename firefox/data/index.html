@@ -7,7 +7,7 @@
 	
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-	
+	<link rel="stylesheet" href="css/bootstrap-theme.min.css">
 	<link href="css/style.css" rel="stylesheet">
   </head>
   <body>  
@@ -159,78 +159,136 @@
 					</div>
 				</div>
 				
-				<div class="row" id="improveTable"> <!-- start of table -->
+				<div class="row" id="improve"> <!-- start of table -->
 					<div class="col-xs-offset-1 col-xs-10">
-						<div class="panel panel-default">
-							<div class="panel-heading">Password Strength Properties</div>
-							<!-- Table -->
-							<table class="table">
-								<tr>
-								  <th>Property</th>
-								  <th># of Occurrences</th>
-								  <th>Comments</th>
-								</tr>
-								<tr>
-								  <td>Password length</td>
-								  <td id="table-hasLength"></td>
-								  <td id="table-lengthComments"></td>
-								</tr>
-								<tr>
-								  <td>Numbers</td>
-								  <td id="table-hasNum"></td>
-								  <td id="table-numComment"></td>
-								</tr>
-								<tr>
-								  <td>Lower Case Letters</td>
-								  <td id="table-hasLetter"></td>
-								  <td id="table-letterComment"></td>
-								</tr>
-								<tr>
-								  <td>Upper Case letters</td>
-								  <td id="table-hasUpper"></td>
-								  <td id="table-upperComment"></td>
-								</tr>
-								<tr>
-								  <td>Special Characters</td>
-								  <td id="table-hasSpec"></td>
-								  <td id="table-specComment"></td>
-								</tr>
+						<ul class="nav nav-tabs" role="tablist">
+						  <li class="active" id="tablesTab"><a href="#">Table View</a></li>
+						  <li id="graphsTab"><a href="#">Graph View</a></li>
+						</ul>
+						
+						<div class="panel panel-default" id="improveTables">
+						  <div class="panel-body">
+							<div class="panel panel-default">
+								<div class="panel-heading"><strong>Password Strength Properties</strong></div>
+								<!-- Table -->
+								<table class="table">
+									<tr>
+									  <th>Property</th>
+									  <th># of Occurrences</th>
+									  <th>Comments</th>
+									</tr>
+									<tr>
+									  <td>Password length</td>
+									  <td id="table-hasLength"></td>
+									  <td id="table-lengthComments"></td>
+									</tr>
+									<tr>
+									  <td>Numbers</td>
+									  <td id="table-hasNum"></td>
+									  <td id="table-numComment"></td>
+									</tr>
+									<tr>
+									  <td>Lower Case Letters</td>
+									  <td id="table-hasLetter"></td>
+									  <td id="table-letterComment"></td>
+									</tr>
+									<tr>
+									  <td>Upper Case letters</td>
+									  <td id="table-hasUpper"></td>
+									  <td id="table-upperComment"></td>
+									</tr>
+									<tr>
+									  <td>Special Characters</td>
+									  <td id="table-hasSpec"></td>
+									  <td id="table-specComment"></td>
+									</tr>
 
-							</table>
+								</table>
+							</div> 
+							<div class="panel panel-default">
+								<div class="panel-heading">
+								<strong>Time Needed to Hack</strong>
+								<br>Hover over any of the terms in the table below for more information.</br></div>
+								<!-- Table -->
+								<table class="table">
+									<tr>
+									  <th>Attack Type</th>
+									  <th>Computer Speed</th>
+									  <th>Time Needed</th>
+									</tr>
+									<tr>
+									  <td class="attackTypeBrute" data-toggle="tooltip">Brute Force</td>
+									  <td class="computerSpeedNormal" data-toggle="tooltip">Normal</td>
+									  <td id="table-bruteNormal"></td>
+									</tr>
+									<tr>
+									  <td class="attackTypeBrute" data-toggle="tooltip">Brute Force</td>
+									  <td class="computerSpeedFast" data-toggle="tooltip">Fast</td>
+									  <td id="table-bruteFast"></td>
+									</tr>
+									
+									<tr>
+									  <td class="attackTypeDictTop" data-toggle="tooltip">Dictionary - Top 10'000 passwords</td>
+									  <td class="computerSpeedNormal" data-toggle="tooltip">Normal</td>
+									  <td id="table-topNormal"></td>
+									</tr>
+									<tr>
+									  <td class="attackTypeDictTop" data-toggle="tooltip">Dictionary - Top 10'000 passwords</td>
+									  <td class="computerSpeedFast" data-toggle="tooltip">Fast</td>
+									  <td id="table-topFast"></td>
+									</tr>
+									
+									<tr>
+									  <td class="attackTypeDictJohn" data-toggle="tooltip">Dictionary - John The Ripper</td>
+									  <td class="computerSpeedNormal" data-toggle="tooltip">Normal</td>
+									  <td id="table-johnNormal"></td>
+									</tr>
+									<tr>
+									  <td class="attackTypeDictJohn" data-toggle="tooltip">Dictionary - John The Ripper</td>
+									  <td class="computerSpeedFast" data-toggle="tooltip">Fast</td>
+									  <td id="table-johnFast"></td>
+									</tr>
+									
+									<tr>
+									  <td class="attackTypeDictCain" data-toggle="tooltip">Dictionary - Cain &amp Abel</td>
+									  <td class="computerSpeedNormal" data-toggle="tooltip">Normal</td>
+									  <td id="table-cainNormal"></td>
+									</tr>
+									<tr>
+									  <td class="attackTypeDictCain" data-toggle="tooltip">Dictionary - Cain &amp Abel </td>
+									  <td class="computerSpeedFast" data-toggle="tooltip">Fast</td>
+									  <td id="table-cainFast"></td>
+									</tr>
+									
+									<tr>
+									  <td class="attackTypeDictRock" data-toggle="tooltip">Dictionary - Rock You </td>
+									  <td class="computerSpeedNormal" data-toggle="tooltip">Normal</td>
+									  <td id="table-rockNormal"></td>
+									</tr>
+									<tr>
+									  <td class="attackTypeDictRock" data-toggle="tooltip">Dictionary - Rock You </td>
+									  <td class="computerSpeedFast" data-toggle="tooltip">Fast</td>
+									  <td id="table-rockFast"></td>
+									</tr>
+								</table>
+							</div>
+						  </div>
 						</div>
-					<!-- 
-						<div class="panel panel-default">
-							<div class="panel-heading">Password Choice Properties</div>
-							
-							<table class="table">
-								<tr>
-								  <th>Property</th>
-								  <th>Occurrence</th>
-								</tr>
-							    <tr>
-								  <td>In the TOP 10000 password</td>
-								  <td id="table-inTop"></td>
-								</tr>
-							</table>
-						</div>
-					-->
-						<div class="panel panel-default">
-							<div class="panel-heading">Time Taken to Crack Using a Brute Force Attack</div>
-							<!-- Table -->
-							<table class="table">
-								<tr>
-								  <th>Machine</th>
-								  <th>Time</th>
-								</tr>
-							    <tr>
-								  <td>Standard CPU (2Ghz, single core)</td>
-								  <td id="table-bruteStandard"></td>
-								</tr>
-								<tr>
-								<td>Fast CPU (3.7Ghz, quad core)</td>
-								  <td id="table-bruteFast"></td>
-								</tr>
-							</table>
+						<div class="panel panel-default" id="improveGraphs">
+							<div class="panel-body">
+								<div class="panel panel-default">
+									<div class="panel-heading"><strong>Password Strength Properties</strong></div>
+									<div class="panel-body text-center">
+										<div class="col-xs-offset-1 col-xs-10" id="passbBarChart"></div>
+									</div>
+								</div>
+								<div class="panel panel-default">
+									<div class="panel-heading"><strong>Time Needed to Hack</strong></div>
+									<div class="panel-body text-center">
+										<div class="col-xs-offset-1 col-xs-10" id="passLineChart"></div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -242,7 +300,10 @@
     <script src="js/jquery-2.1.1.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>	
-	
+	<!-- Include the charts library -->
+	<script src="js/highcharts.js"></script>
+	<script src="js/dark-unica.js"></script>
+	<!-- main script -->
 	<script type="text/javascript" src="js/sidebar.js"></script>	
   </body>
 </html>
