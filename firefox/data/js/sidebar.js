@@ -17,8 +17,9 @@ var cainLoaded = false;
 var rockyouDict;
 var rockyouLoaded = false;
 
-var barChart;
-var lineChart;
+var contentChart;
+var timeChart;
+var timeFastChart;
 
 //Navigation bar listeners
 
@@ -35,6 +36,9 @@ if (window.addon != undefined) {	//use as check to see if we're in the sidebar o
 		$("#fullButton").show();
 		});
 }
+
+if (!filesLoaded)	//load dictionary attack files if not already loaded
+	loadFiles();
 
 //Allows navigation back to the home page
 $("#homeButton").click(function() {
@@ -93,6 +97,7 @@ $("#existAdviceButton").click(function() {
 	$("#improvePass").show();
 	$("#advice").hide();
 	$("#improve").show();
+	$("#improveGraphs").hide();
 	previous = current;
 	current = "#improvePass";
 });
@@ -113,6 +118,7 @@ $("#tablesTab").click(function() {
 	$("#graphsTab").attr('class', '');
 	$("#improveGraphs").hide();
 	$("#improveTables").show();
+	calculateStrength();
 });
 
 //Shows the improvement graphs
@@ -181,9 +187,6 @@ $( "#inputPassword" ).on('input', function() {
 	
 	//avoid continuing the calculation once the target has been reached		
 	updateProgress(calculateStrength());
-	
-	if (!filesLoaded)	//load dictionary attack files if not already loaded
-		loadFiles();
 });
 
 function updateProgress(calculated)
@@ -229,6 +232,8 @@ function updateProgress(calculated)
 
 function calculateStrength()
 {
+	var pass = $( "#inputPassword" ).val();
+
 	var chr;
 	var hasLetter = 0;
 	var letterCount =0;
@@ -238,9 +243,9 @@ function calculateStrength()
 	var symbolCount =0;
 	var hasUpper = 0;
 	var upperCount=0;
-	for (var i=0; i<$( "#inputPassword" ).val().length; i++)
+	for (var i=0; i<pass.length; i++)
 	{
-		chr = $( "#inputPassword" ).val().charAt(i);
+		chr = pass.charAt(i);
 		if (isUpperCase(chr)) {
 			hasUpper = 1;
 			upperCount++;
@@ -263,6 +268,23 @@ function calculateStrength()
 	if ($( "#improveGraphs" ).attr('style') != 'display: none;')
 		updateGraphs(numberCount, letterCount, upperCount, symbolCount);
 	
+	//check if the password is in a dictionary, if it is the strength is equal to the size of the dictionary
+	//start with smallest dict and then go to larger
+	if (inDictionary(pass, johnDict)) {
+		//john the ripper has 3107 words in its dictionary
+		return 3107;
+	} else if(inDictionary(pass, commonDict)) {
+		//top 10'000 has 10'0000 words in its dictionary
+		return 10000;
+	} else if (inDictionary(pass, cainDict)) {
+		//cain & abel has 306706 words in its dictionary
+		return 306706;
+	} else if (inDictionary(pass, rockyouDict)) {
+		//rock you has 14344383 words in its dictionary
+		return 14344383;
+	}
+	
+	//will only be invoked if the word is not in a dictionary
 	return Math.pow((hasLetter * 26) + (hasUpper * 26) + (hasNumber * 10) + (hasSymbol * 33),$( "#inputPassword" ).val().length);
 }
 
@@ -300,6 +322,7 @@ function updateAdvice(passLength, hasNumber, hasLetter, hasUpper, hasSymbol) {
 }
 
 function updateTable(pass, numberCount, letterCount, upperCount, symbolCount){	
+	console.log("update table invoked");
 	//Password strength properties
 	//Values
 	$("#table-hasLength").empty();
@@ -378,7 +401,7 @@ function updateComments(passLength, numberCount, letterCount, upperCount, symbol
 }
 
 function updateTableBruteTimeToCrack(passLength, numberCount, letterCount, upperCount, symbolCount) {
-	var passKeySpace = calcBruteKeySpace(passLength, numberCount, letterCount, upperCount, symbolCount);
+	var passKeySpace = calcKeySpace(passLength, numberCount, letterCount, upperCount, symbolCount);
 	
 	//calculated as instructions per second
 	//standard 2.0GHz, 1 core
@@ -648,7 +671,7 @@ function fileDataToArray(fileData) {
 //function to determine if the word is in the dictionary
 function inDictionary(word, dict){
 	var wordLength = word.length;
-	if (wordLength > 0) {
+	if (wordLength > 0 && wordLength <= dict.length) {
 		var lengthArray = dict[wordLength-1];
 		if (lengthArray.length > 1) {
 			for (var i=0; i<lengthArray.length; i++) {
@@ -679,11 +702,11 @@ function updateTableDictionaryAttacks() {
 			$("#table-topFast").attr('class', 'text-danger');
 		} else {
 			$("#table-topNormal").empty();
-			$("#table-topNormal").append("Not in dictionary");
+			$("#table-topNormal").append("Not in the dictionary");
 			$("#table-topNormal").attr('class', 'text-success');
 				
 			$("#table-topFast").empty();
-			$("#table-topFast").append("Not in dictionary");
+			$("#table-topFast").append("Not in the dictionary");
 			$("#table-topFast").attr('class', 'text-success');
 		}
 	} else {
@@ -710,11 +733,11 @@ function updateTableDictionaryAttacks() {
 			$("#table-johnFast").attr('class', 'text-danger');
 		} else {
 			$("#table-johnNormal").empty();
-			$("#table-johnNormal").append("Not in dictionary");
+			$("#table-johnNormal").append("Not in the dictionary");
 			$("#table-johnNormal").attr('class', 'text-success');
 				
 			$("#table-johnFast").empty();
-			$("#table-johnFast").append("Not in dictionary");
+			$("#table-johnFast").append("Not in the dictionary");
 			$("#table-johnFast").attr('class', 'text-success');
 		}
 	} else {
@@ -726,7 +749,7 @@ function updateTableDictionaryAttacks() {
 			$("#table-johnFast").append("Loading Dictionary");
 			$("#table-johnFast").attr('class', 'text-primary');
 	}
-	//John the Ripper
+	//Cain and Abel
 	if (cainLoaded) {
 		if (inDictionary(pass, cainDict)) {
 			var standardPc = 306706/2000000000;	//cain & abel has 306706 words in its dictionary
@@ -741,11 +764,11 @@ function updateTableDictionaryAttacks() {
 			$("#table-cainFast").attr('class', 'text-danger');
 		} else {
 			$("#table-cainNormal").empty();
-			$("#table-cainNormal").append("Not in dictionary");
+			$("#table-cainNormal").append("Not in the dictionary");
 			$("#table-cainNormal").attr('class', 'text-success');
 				
 			$("#table-cainFast").empty();
-			$("#table-cainFast").append("Not in dictionary");
+			$("#table-cainFast").append("Not in the dictionary");
 			$("#table-cainFast").attr('class', 'text-success');
 		}
 	} else {
@@ -757,7 +780,7 @@ function updateTableDictionaryAttacks() {
 			$("#table-cainFast").append("Loading Dictionary");
 			$("#table-cainFast").attr('class', 'text-primary');
 	}
-	//John the Ripper
+	//Rock you
 	if (rockyouLoaded) {
 		if (inDictionary(pass, rockyouDict)) {
 			var standardPc = 14344383/2000000000;	//rock you has 14344383 words in its dictionary
@@ -772,11 +795,11 @@ function updateTableDictionaryAttacks() {
 			$("#table-rockFast").attr('class', 'text-danger');
 		} else {
 			$("#table-rockNormal").empty();
-			$("#table-rockNormal").append("Not in dictionary");
+			$("#table-rockNormal").append("Not in the dictionary");
 			$("#table-rockNormal").attr('class', 'text-success');
 				
 			$("#table-rockFast").empty();
-			$("#table-rockFast").append("Not in dictionary");
+			$("#table-rockFast").append("Not in the dictionary");
 			$("#table-rockFast").attr('class', 'text-success');
 		}
 	} else {
@@ -791,14 +814,18 @@ function updateTableDictionaryAttacks() {
 }
 
 function initGraphs(){
-	initBarChart();
-	initLineChart();
+	if (contentChart == undefined)
+		initContentChart();
+	if (timeChart == undefined)
+		initTimeCharts();
+	if ($( "#inputPassword" ).val().length >0)
+		calculateStrength();
 }
 
-function initBarChart(){
-	barChart = new Highcharts.Chart({
+function initContentChart(){
+	contentChart = new Highcharts.Chart({
         chart: {
-			renderTo: 'passbBarChart',
+			renderTo: 'passContentChart',
             type: 'column'
         },
         title: {
@@ -820,45 +847,101 @@ function initBarChart(){
     });
 }
 
-function initLineChart(){
-	    lineChart = new Highcharts.Chart({
+function initTimeCharts(){
+	    timeChart = new Highcharts.Chart({
         chart: {
-			renderTo: 'passLineChart',
-            type: 'line'
+			renderTo: 'passTimeChart',
+            type: 'bar'
         },
         title: {
-            text: 'Time Needed to Hack'
+            text: 'Time Needed to Hack - Standard PC'
         },
         xAxis: {
+			categories: ['AttackType']
+        },
+		yAxis: {
+			min:0,
 			title: {
-                    text: 'Time'
+                    text: 'Time in - Seconds',
+                },
+			labels: {
+				overflow: 'justify'
+				}
+        },
+        plotOptions: {
+            bar: {
+                dataLabels: {
+                    enabled: true
                 }
-        },
-        yAxis: {
-            title: {
-                text: 'Number of Occurences'
-            },
-			min:0
-        },
-		legend: {
-            layout: 'vertical',
-            align: 'right',
-            verticalAlign: 'middle',
-            borderWidth: 0
+            }
         },
         series: [{
+			id: 'brute',
             name: 'Brute Force',
             data: [0]
         }, {
+			id: 'top',
             name: "Dictionary - top 10'000 passwords",
             data: [0]
         }, {
+			id: 'john',
             name: "Dictionary - John The Ripper",
             data: [0]
         }, {
+			id: 'cain',
             name: "Dictionary - Cain & Abel",
             data: [0]
         }, {
+			id: 'rock',
+            name: "Dictionary - Rock You",
+            data: [0]
+        } ]
+    });
+	 timeFastChart = new Highcharts.Chart({
+        chart: {
+			renderTo: 'passTimeFastChart',
+            type: 'bar'
+        },
+        title: {
+            text: 'Time Needed to Hack - Fast PC'
+        },
+        xAxis: {
+			categories: ['AttackType']
+        },
+		yAxis: {
+			min:0,
+			title: {
+                    text: 'Time in - Seconds',
+                },
+			labels: {
+				overflow: 'justify'
+				}
+        },
+        plotOptions: {
+            bar: {
+                dataLabels: {
+                    enabled: true
+                }
+            }
+        },
+        series: [{
+			id: 'brute',
+            name: 'Brute Force',
+            data: [0]
+        }, {
+			id: 'top',
+            name: "Dictionary - top 10'000 passwords",
+            data: [0]
+        }, {
+			id: 'john',
+            name: "Dictionary - John The Ripper",
+            data: [0]
+        }, {
+			id: 'cain',
+            name: "Dictionary - Cain & Abel",
+            data: [0]
+        }, {
+			id: 'rock',
             name: "Dictionary - Rock You",
             data: [0]
         } ]
@@ -866,29 +949,115 @@ function initLineChart(){
 }
 
 function updateGraphs(numberCount, letterCount, upperCount, symbolCount) {
-	updateBarChart(numberCount, letterCount, upperCount, symbolCount);
-	updateLineChart(numberCount, letterCount, upperCount, symbolCount);
+	updateContentChart(numberCount, letterCount, upperCount, symbolCount);
+	updateTimeCharts(numberCount, letterCount, upperCount, symbolCount);
 }
 
-function updateBarChart(numberCount, letterCount, upperCount, symbolCount){
-	barChart.series[0].data[0].update(y  = numberCount);
-	barChart.series[0].data[1].update(y  = letterCount);
-	barChart.series[0].data[2].update(y  = upperCount);
-	barChart.series[0].data[3].update(y  = symbolCount);
+function updateContentChart(numberCount, letterCount, upperCount, symbolCount){
+	contentChart.series[0].data[0].update(y  = numberCount);
+	contentChart.series[0].data[1].update(y  = letterCount);
+	contentChart.series[0].data[2].update(y  = upperCount);
+	contentChart.series[0].data[3].update(y  = symbolCount);
 }
 
-function updateLineChart(numberCount, letterCount, upperCount, symbolCount){
-	var keySpace = calcKeySpace(numberCount, letterCount, upperCount, symbolCount);
+function updateTimeCharts(numberCount, letterCount, upperCount, symbolCount){
+	var pass = $("#inputPassword" ).val();
+	var calculated = calcKeySpace(pass.length,numberCount, letterCount, upperCount, symbolCount);
 	
-	var standardPc = keySpace/2000000000; //time needed in seconds
+	var standardPc = calculated/2000000000; //time needed in seconds
+	var fastPc = calculated/(4*(3700000000));
 	
-	lineChart.series[0].addPoint([keySpace, standardPc]);
-	//lineChart.series[0].data[1].update(y  = letterCount);
-	//lineChart.series[0].data[2].update(y  = upperCount);
-	//lineChart.series[0].data[3].update(y  = symbolCount);
-	lineChart.redraw();
+	var mins = standardPc/60;
+	var hours = mins/60;
+	var days = hours/24;
+	var years = days/365;
+	
+	//change labels to minutes if the time to hack is longer than 60 seconds
+	if (mins>1 && hours <1 && days < 1 && years <1) {
+		timeChart.yAxis[0].axisTitle.attr({text: 'Time in - Minutes'});
+		standardPc = mins;
+	} else if (hours >1 && days < 1 && years < 1) {
+		timeChart.yAxis[0].axisTitle.attr({text: 'Time in - Hours'});
+		standardPc = hours;
+	} else if (days >1 && years < 1) {
+		timeChart.yAxis[0].axisTitle.attr({text: 'Time in - Days'});
+		standardPc = days;
+	} else if (years >1) {
+		timeChart.yAxis[0].axisTitle.attr({text: 'Time in - Years'});
+		standardPc = years;
+	}
+	
+	var fmins = fastPc/60;
+	var fhours = mins/60;
+	var fdays = hours/24;
+	var fyears = days/365;
+	
+	//change labels to minutes if the time to hack is longer than 60 seconds
+	if (fmins>1 && fhours <1 && fdays < 1 && fyears <1) {
+		timeFastChart.yAxis[0].axisTitle.attr({text: 'Time in - Minutes'});
+		fastPc = fmins;
+	} else if (fhours >1 && fdays < 1 && fyears < 1) {
+		timeFastChart.yAxis[0].axisTitle.attr({text: 'Time in - Hours'});
+		fastPc = fhours;
+	} else if (fdays >1 && fyears < 1) {
+		timeFastChart.yAxis[0].axisTitle.attr({text: 'Time in - Days'});
+		fastPc = fdays;
+	} else if (fyears >1) {
+		timeFastChart.yAxis[0].axisTitle.attr({text: 'Time in - Years'});
+		fastPc = fyears;
+	}
+	
+	//get the series by name and add a new point
+	timeChart.series[0].data[0].update(y  = standardPc);
+	timeFastChart.series[0].data[0].update(y  = fastPc);
+	
+	//Top 10'000
+	if (commonLoaded) {
+		if (inDictionary(pass, commonDict)) {
+			console.log("in Common");
+			//top 10'000 has 10'0000 words in its dictionary
+			timeChart.series[1].data[0].update(y  = 10000/2000000000);
+			timeFastChart.series[1].data[0].update(y  = (10000/(4*(3700000000))));
+		} else { 
+			timeChart.series[1].data[0].update(y  = standardPc);
+			timeFastChart.series[1].data[0].update(y  = fastPc);
+		}
+	}
+	//John The Ripper
+	if (johnLoaded) {
+		if (inDictionary(pass, johnDict)) {
+			console.log("in john");
+			//john the ripper has 3107 words in its dictionary
+			timeChart.series[2].data[0].update(y  = 3107/2000000000);
+			timeFastChart.series[2].data[0].update(y  = (3107/(4*(3700000000))));
+		} else {
+			timeChart.series[2].data[0].update(y  = standardPc);
+			timeFastChart.series[2].data[0].update(y  = fastPc);
+		}
+	}
+	//Cain and Abel
+	if (cainLoaded) {
+		if (inDictionary(pass, cainDict)) {
+			console.log("in cain");
+			//cain & abel has 306706 words in its dictionary
+			timeChart.series[3].data[0].update(y  = 306706/2000000000);
+			timeFastChart.series[3].data[0].update(y  = (306706/(4*(3700000000))));
+		} else {
+			timeChart.series[3].data[0].update(y  = standardPc);
+			timeFastChart.series[3].data[0].update(y  = fastPc);
+		}
+	}
+	//Rock you
+	if (rockyouLoaded) {
+		if (inDictionary(pass, rockyouDict)) {
+			console.log("in rockyou");
+			//rock you has 14344383 words in its dictionary
+			timeChart.series[4].data[0].update(y  = 14344383/2000000000);
+			timeFastChart.series[4].data[0].update(y  = (14344383/(4*(3700000000))));
+		} else {
+			timeChart.series[4].data[0].update(y  = standardPc);
+			timeFastChart.series[4].data[0].update(y  = fastPc);
+		}
+	}
+	timeChart.redraw();
 }
-
-//Math.ceil((((calculated/veryWeakPassword)*100)/4))
-//	var standardPc = passKeySpace/2000000000; //time needed in seconds
-//	var fastPc = passKeySpace/(4*(3700000000));
