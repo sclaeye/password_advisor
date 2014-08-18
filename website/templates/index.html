@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid">
+	<div class="row"> 
+		<div class="col-md-offset-3 col-md-6">
+			<div class="panel panel-default">
+				<div class="panel-body">
+						Thank you for taking part in the evaluation of my web browser extension. If you have any questions or concerns feel free to e-mail me at: 0905384c@student.gla.ac.uk
+				</div>
+			</div>
+		
+			<div class="panel panel-default">
+				<div class="panel-heading"><strong>Installation instructions</strong></div>
+				<div class="panel-body">
+					<ol>
+					  <li>Ensure that you are using the Firefox web browser, if you do not have Firefox installed then download and install it from <a href="https://www.mozilla.org/en-GB/firefox/new/" target="_blank">here</a>.</li>
+					  <li>Download the Firefox extension from <a href="">here</a>.</li>
+					  <li>Install the extension by dragging the password_advisor.xpi file into the browser. Alternatively open the file from the browser (windows: ctrl + o; mac: command+ o)</li>
+					  <li>When prompted on whether or not to trust the installation, click yes.</li>
+					  <li>Once installed the extension can be accessed using the lock icon at the top right hand corner.</li>
+					</ol>
+				</div>
+			</div>
+	
+			<div class="panel panel-default">
+				<div class="panel-heading"><strong>Tasks</strong></div>
+				<div class="panel-body">
+					Start the evaluation tasks here:
+				
+					<div class="row"> 
+						<div class="col-md-12 text-center">
+							<div class="btn-group-lg btn-group-vertical">
+								<button type="button" id="task1Button" class="btn btn-primary">Task 1</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="panel panel-default">
+				<div class="panel-heading"><strong>Questionnaire</strong></div>
+				<div class="panel-body">
+					Once you have completed the tasks please complete the questionnaire below.
+					<br><a href="https://docs.google.com/forms/d/1V-SyvnahzoWkK1f7ZExi7eh4GyOTWicWZZhk1byh9QQ/viewform"> Link to questionnaire<a></br>
+				</div>
+			</div>
+		</div>
+</div>
+<script src="{% static 'js/jquery-2.1.1.min.js' %}"></script>
+<script src="{% static 'js/index.js' %}"></script>
+{% endblock content %}

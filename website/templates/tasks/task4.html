@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+	<div class="row"> 
+			<div class="col-md-offset-3 col-md-6">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						 The scenario will detail what kind of website you are creating a password for. <strong> Please use the existing password feature of the extension for this task.</strong>
+					</div>
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-heading"><strong>Scenario - Task 4</strong></div>
+					<div class="panel-body">
+						For this task you will make use of the existing password feature of the extension. Please improve on the password provided. The website on which the password has previously been used is a file sharing service similar to dropbox. The website allows you to upload files and makes these available for download by friends. The website does not restrict you with regards to what files you upload.
+					</div>
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-heading"><strong>Create Password</strong></div>
+					<div class="panel-body">
+					
+					{% if registered %}
+							<strong>Task 1 of 4 completed. Please continue to task 2.</strong>
+							<button type="button" id="task2Button" class="btn btn-primary">Task 2</button>
+							<a href="/ciderseeker/">Return to the homepage.</a><br />
+					{% else %}
+						<form class="form-horizontal" id="task1_form" method="post" action="/task1/"
+							  enctype="multipart/form-data">
+
+						{% csrf_token %}
+
+						{% for hidden in form.hidden_fields %}
+							{{ hidden }}
+						{% endfor %}
+
+						<form class="form-horizontal">
+							<fieldset>
+								{% for field in form.visible_fields %}
+									<div class="form-group">
+										<label class="col-lg-2 control-label">{{ field.help_text }}</label>
+										<div class="col-lg-10">
+											{{ field }}
+											{{field.errors}}
+										</div>
+									</div>
+								{% endfor %}
+							</fieldset>
+							<div class="col-md-offset-9">
+								<button type="submit" class="btn btn-success">Create Password</button>
+							</div>
+						</form>
+					{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock content %}

@@ -1,7 +1,3 @@
 1. make previous button use a stack
 2. table
 	- allow to toggle collapsing tables
-3. dictionary attack?
-4. top 10000 passwords?
-5. rainbow table?
-6. 

@@ -3,7 +3,7 @@ var previous = "#mainMenu";
 var targetPassStrength;
 const veryWeakPassword = Math.pow(26, 6);
 const weakPassword = Math.pow(36, 8);
-const strongPassword = Math.pow(62, 10);
+const strongPassword = Math.pow(95, 8);
 const veryStrongPassword = Math.pow(95, 12);
 var dictionaries = new Array();
 var filesLoaded = false;
@@ -108,6 +108,7 @@ $("#questionsButton").click(function() {
 	$(current).hide();
 	$("#improvePass").show();
 	$("#advice").show();
+	$("#improveGraphs").hide();
 	previous = current;
 	current = "#improvePass";
 });
@@ -267,25 +268,52 @@ function calculateStrength()
 		updateTable($( "#inputPassword" ).val(), numberCount, letterCount, upperCount, symbolCount);
 	if ($( "#improveGraphs" ).attr('style') != 'display: none;')
 		updateGraphs(numberCount, letterCount, upperCount, symbolCount);
+		
+	
 	
 	//check if the password is in a dictionary, if it is the strength is equal to the size of the dictionary
 	//start with smallest dict and then go to larger
 	if (inDictionary(pass, johnDict)) {
+		if ($( "#advice" ).attr('style') != 'display: none;')
+			inDictionarySetText(true); 
 		//john the ripper has 3107 words in its dictionary
 		return 3107;
 	} else if(inDictionary(pass, commonDict)) {
+		if ($( "#advice" ).attr('style') != 'display: none;')
+			inDictionarySetText(true); 
 		//top 10'000 has 10'0000 words in its dictionary
 		return 10000;
 	} else if (inDictionary(pass, cainDict)) {
+		if ($( "#advice" ).attr('style') != 'display: none;')
+			inDictionarySetText(true); 
 		//cain & abel has 306706 words in its dictionary
 		return 306706;
 	} else if (inDictionary(pass, rockyouDict)) {
+		if ($( "#advice" ).attr('style') != 'display: none;')
+			inDictionarySetText(true);
 		//rock you has 14344383 words in its dictionary
 		return 14344383;
+	} else {
+		if ($( "#advice" ).attr('style') != 'display: none;')
+			inDictionarySetText(false);
 	}
 	
 	//will only be invoked if the word is not in a dictionary
 	return Math.pow((hasLetter * 26) + (hasUpper * 26) + (hasNumber * 10) + (hasSymbol * 33),$( "#inputPassword" ).val().length);
+}
+
+//helper function to add appropriate text to the inDictionary field
+function inDictionarySetText(bool) {
+	if (bool) {
+		$("#inDictionary").attr('class', 'text-danger');
+		$("#inDictionary").empty();
+		$("#inDictionary").append("This password is vulnerable to a dictionary attack.");
+	} else {
+		$("#inDictionary").attr('class', 'text-success');
+		$("#inDictionary").empty();
+		$("#inDictionary").append("This password is not vulnerable to a dictionary attack.");
+	
+	}
 }
 
 //Color codes the dynamically generated advice based on what attributes the new password incorporates
@@ -322,7 +350,6 @@ function updateAdvice(passLength, hasNumber, hasLetter, hasUpper, hasSymbol) {
 }
 
 function updateTable(pass, numberCount, letterCount, upperCount, symbolCount){	
-	console.log("update table invoked");
 	//Password strength properties
 	//Values
 	$("#table-hasLength").empty();
@@ -535,10 +562,10 @@ function generateAdvice(){
 			$("#aimFor").append("Password strength to aim for: Strong");
 			break;
 		case 3:	//Weak
-			$("#aimFor").append("Password strength to aim for: Very Weak");
+			$("#aimFor").append("Password strength to aim for: Weak");
 			break;
 		case 4:	//Very Weak
-			$("#aimFor").append("Password strength to aim for: Weak");
+			$("#aimFor").append("Password strength to aim for: Very Weak");
 			break;
 	}
 }
@@ -564,25 +591,54 @@ function createMemorabilityAdvice(){
 	passwordAdvice.push("Write down a cryptic clue that will allow you to remember the password");
 	passwordAdvice.push("Use a password similar to one of your existing passwords");
 	passwordAdvice.push("Use a shorter password but use a full mixture of characters (upper and lower case letters, numbers, symbols.");
+	passwordAdvice.push("Alternatively, use a longer password consisting of only letters.");
 	return passwordAdvice;
 }
 
 //A helper function which creates an array of arrays which holds the advice matrix (see documentation)
 function createAdviceMatrix(){
 	var adviceMatrix = new Array();
-	adviceMatrix.push(new Array());
-	adviceMatrix.push(new Array());
-	adviceMatrix.push(new Array());
+	adviceMatrix.push(new Array());	//col 1
+	adviceMatrix.push(new Array()); //col 2
+	adviceMatrix.push(new Array()); //col 3
+	adviceMatrix.push(new Array()); //col 4
+	adviceMatrix.push(new Array()); //col 5
 	//very strong = 1, very weak =4;
+	//col 1
 	adviceMatrix[0][0]= 1;
  	adviceMatrix[0][1]= 1;
- 	adviceMatrix[0][2]= 2;
+ 	adviceMatrix[0][2]= 1;
+	adviceMatrix[0][3]= 1;
+ 	adviceMatrix[0][4]= 2;
+ 	adviceMatrix[0][5]= 2;
+	//col 2
 	adviceMatrix[1][0]= 1;
- 	adviceMatrix[1][1]= 2;
- 	adviceMatrix[1][2]= 3;
-	adviceMatrix[2][0]= 2;
- 	adviceMatrix[2][1]= 3;
- 	adviceMatrix[2][2]= 4;
+ 	adviceMatrix[1][1]= 1;
+ 	adviceMatrix[1][2]= 2;
+	adviceMatrix[1][3]= 2;
+ 	adviceMatrix[1][4]= 2;
+ 	adviceMatrix[1][5]= 2;
+	//col 3
+	adviceMatrix[2][0]= 1;
+ 	adviceMatrix[2][1]= 1;
+ 	adviceMatrix[2][2]= 2;
+	adviceMatrix[2][3]= 2;
+ 	adviceMatrix[2][4]= 3;
+ 	adviceMatrix[2][5]= 3;
+	//col 4
+	adviceMatrix[3][0]= 1;
+ 	adviceMatrix[3][1]= 2;
+ 	adviceMatrix[3][2]= 2;
+	adviceMatrix[3][3]= 3;
+ 	adviceMatrix[3][4]= 3;
+ 	adviceMatrix[3][5]= 4;
+	//col 5
+	adviceMatrix[4][0]= 2;
+ 	adviceMatrix[4][1]= 2;
+ 	adviceMatrix[4][2]= 3;
+	adviceMatrix[4][3]= 3;
+ 	adviceMatrix[4][4]= 4;
+ 	adviceMatrix[4][5]= 4;
 	return adviceMatrix;
 }
 
@@ -634,7 +690,6 @@ function readFile(fileName){
             if(rawFile.status === 200 || rawFile.status == 0)	
             {
 				dictionaries.push(fileDataToArray(rawFile.responseText));
-				console.log(dictionaries);
             }
         }
     }
@@ -1014,7 +1069,6 @@ function updateTimeCharts(numberCount, letterCount, upperCount, symbolCount){
 	//Top 10'000
 	if (commonLoaded) {
 		if (inDictionary(pass, commonDict)) {
-			console.log("in Common");
 			//top 10'000 has 10'0000 words in its dictionary
 			timeChart.series[1].data[0].update(y  = 10000/2000000000);
 			timeFastChart.series[1].data[0].update(y  = (10000/(4*(3700000000))));
@@ -1026,7 +1080,6 @@ function updateTimeCharts(numberCount, letterCount, upperCount, symbolCount){
 	//John The Ripper
 	if (johnLoaded) {
 		if (inDictionary(pass, johnDict)) {
-			console.log("in john");
 			//john the ripper has 3107 words in its dictionary
 			timeChart.series[2].data[0].update(y  = 3107/2000000000);
 			timeFastChart.series[2].data[0].update(y  = (3107/(4*(3700000000))));
@@ -1038,7 +1091,6 @@ function updateTimeCharts(numberCount, letterCount, upperCount, symbolCount){
 	//Cain and Abel
 	if (cainLoaded) {
 		if (inDictionary(pass, cainDict)) {
-			console.log("in cain");
 			//cain & abel has 306706 words in its dictionary
 			timeChart.series[3].data[0].update(y  = 306706/2000000000);
 			timeFastChart.series[3].data[0].update(y  = (306706/(4*(3700000000))));
@@ -1050,7 +1102,6 @@ function updateTimeCharts(numberCount, letterCount, upperCount, symbolCount){
 	//Rock you
 	if (rockyouLoaded) {
 		if (inDictionary(pass, rockyouDict)) {
-			console.log("in rockyou");
 			//rock you has 14344383 words in its dictionary
 			timeChart.series[4].data[0].update(y  = 14344383/2000000000);
 			timeFastChart.series[4].data[0].update(y  = (14344383/(4*(3700000000))));

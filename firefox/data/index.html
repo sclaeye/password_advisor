@@ -39,9 +39,6 @@
 					<div class="btn-group-vertical">
 					  <button type="button" id="createButton" class="btn btn-primary">A new password</button>
 					  <button type="button" id="existAdviceButton" class="btn btn-primary">An existing password</button>
-			<!--
-					  <button type="button" id="genAdviceButton" class="btn btn-primary">Good Practices</button>
-			-->
 					</div>
 			</div>
 								
@@ -57,19 +54,31 @@
 								<div class="radio">
 									<label>
 										<input type="radio" name="optionsRadios1" id="optionsRadios1" value="0" checked>
-										Financial Information
+										Very Sensitive Data
 									</label>
 								</div>
 								<div class="radio">
 									<label>
 									<input type="radio" name="optionsRadios1" id="optionsRadios2" value="1">
-										Personal Information
+										Fairly Sensitive Data
 									</label>
 								</div>
 								<div class="radio">
 									<label>
 									<input type="radio" name="optionsRadios1" id="optionsRadios3" value="2">
-										General Information
+										Sensitive Data
+									</label>
+								</div>
+								<div class="radio">
+									<label>
+									<input type="radio" name="optionsRadios1" id="optionsRadios4" value="3">
+										Not Very Sensitive Data
+									</label>
+								</div>
+								<div class="radio">
+									<label>
+									<input type="radio" name="optionsRadios1" id="optionsRadios5" value="4">
+										Not Sensitive Data
 									</label>
 								</div>
 							</div>
@@ -83,19 +92,37 @@
 							<div class="form-group">
 								<div class="radio">
 								  <label>
-									<input type="radio" name="optionsRadios2" id="optionsRadios4" value="0" checked>
-									Once a day
+									<input type="radio" name="optionsRadios2" id="optionsRadios6" value="0" checked>
+									Multiple Times per Day
 								  </label>
 								</div>
 								<div class="radio">
 								  <label>
-									<input type="radio" name="optionsRadios2" id="optionsRadios5" value="1">
-									Once a week
+									<input type="radio" name="optionsRadios2" id="optionsRadios7" value="1">
+									Once a Day
 								  </label>
 								</div>
 								<div class="radio">
 								  <label>
-									<input type="radio" name="optionsRadios2" id="optionsRadios6" value="2">
+									<input type="radio" name="optionsRadios2" id="optionsRadios8" value="2">
+									Multiple Times per Week
+								  </label>
+								</div>
+								<div class="radio">
+								  <label>
+									<input type="radio" name="optionsRadios2" id="optionsRadios9" value="3" checked>
+									Once a Week
+								  </label>
+								</div>
+								<div class="radio">
+								  <label>
+									<input type="radio" name="optionsRadios2" id="optionsRadios10" value="4">
+									Multiple Times per Month
+								  </label>
+								</div>
+								<div class="radio">
+								  <label>
+									<input type="radio" name="optionsRadios2" id="optionsRadios11" value="5">
 									Once a month
 								  </label>
 								</div>
@@ -140,6 +167,7 @@
 							<div class="progress-bar progress-bar-success" id="progress-bar-success"></div>
 							<div class="progress-bar progress-bar-great-success" id="progress-bar-great-success"></div>
 						</div>
+						<h5 id="inDictionary"></h4>
 					</div>
 				</div>
 				<div class="row" id="advice">
@@ -161,9 +189,9 @@
 				
 				<div class="row" id="improve"> <!-- start of table -->
 					<div class="col-xs-offset-1 col-xs-10">
-						<ul class="nav nav-tabs" role="tablist">
-						  <li class="active" id="tablesTab"><a href="#">Table View</a></li>
-						  <li id="graphsTab"><a href="#">Graph View</a></li>
+						<ul class="nav nav-pills" role="tablist">
+						  <li class="active" id="tablesTab"><a>Table View</a></li>
+						  <li id="graphsTab"><a>Graph View</a></li>
 						</ul>
 						
 						<div class="panel panel-default" id="improveTables">
@@ -279,19 +307,19 @@
 								<div class="panel panel-default">
 									<div class="panel-heading"><strong>Password Strength Properties</strong></div>
 									<div class="panel-body text-center">
-										<div class="col-xs-offset-1 col-xs-10" id="passContentChart"></div>
+										<div class="col-xs-12" id="passContentChart"></div>
 									</div>
 								</div>
 								<div class="panel panel-default">
 									<div class="panel-heading"><strong>Time Needed to Hack - Standard PC</strong></div>
 									<div class="panel-body text-center">
-										<div class="col-xs-offset-1 col-xs-10" id="passTimeChart"></div>
+										<div class="col-xs-12" id="passTimeChart"></div>
 									</div>
 								</div>
 								<div class="panel panel-default">
 									<div class="panel-heading"><strong>Time Needed to Hack - Fast PC</strong></div>
 									<div class="panel-body text-center">
-										<div class="col-xs-offset-1 col-xs-10" id="passTimeFastChart"></div>
+										<div class="col-xs-12" id="passTimeFastChart"></div>
 									</div>
 								</div>
 							</div>
