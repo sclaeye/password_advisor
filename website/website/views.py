@@ -9,20 +9,18 @@ from django.contrib.auth.decorators import login_required
 def index(request):
     return render_to_response('index.html', {}, RequestContext(request))
 
+def indexCompleted(request):
+	return render_to_response('index.html', {'completed': True}, RequestContext(request))
+	
 def task1(request):
 	context = RequestContext(request)
 	registered = False
-
 	if request.method == 'POST':
 		user_form = task1Form(data=request.POST)
-
 		if user_form.is_valid():
-			user = user_form.save()
+			user_form.save()
 			registered = True
-			return HttpResponseRedirect("../"+user.username+"/task2/")
-		# Invalid form
-		else:
-			print(user_form.errors)
+			return HttpResponseRedirect("../"+user_form.cleaned_data['username']+"/task2/")
 	else:
 		user_form = task1Form(initial={'username': generateNewUser()})
 
@@ -34,11 +32,10 @@ def task2(request, username):
 
 	if request.method == 'POST':
 		user_form = task2Form(data=request.POST)
-
 		if user_form.is_valid():
-			user = user_form.save()
+			user_form.save()
 			registered = True
-			return HttpResponseRedirect("../"+user.username+"/task3/")
+			return HttpResponseRedirect("../task3/")
 		# Invalid form
 		else:
 			print(user_form.errors)
@@ -55,16 +52,16 @@ def task3(request, username):
 		user_form = task3Form(data=request.POST)
 
 		if user_form.is_valid():
-			user = user_form.save()
+			user_form.save()
 			registered = True
-			return HttpResponseRedirect("../"+user.username+"/task4/")
+			return HttpResponseRedirect("../task4/")
 		# Invalid form
 		else:
 			print(user_form.errors)
 	else:
 		user_form = task3Form(initial={'username': username})
 
-	return render_to_response('tasks/task2.html', {'form': user_form, 'registered': registered}, context)
+	return render_to_response('tasks/task3.html', {'form': user_form, 'registered': registered}, context)
 	
 def task4(request, username):
 	context = RequestContext(request)
@@ -74,16 +71,16 @@ def task4(request, username):
 		user_form = task4Form(data=request.POST)
 
 		if user_form.is_valid():
-			user = user_form.save()
+			user_form.save()
 			registered = True
-			return HttpResponseRedirect("../completed")
+			return HttpResponseRedirect("/completed")
 		# Invalid form
 		else:
 			print(user_form.errors)
 	else:
 		user_form = task4Form(initial={'username': username})
 
-	return render_to_response('tasks/task2.html', {'form': user_form, 'registered': registered}, context)
+	return render_to_response('tasks/task4.html', {'form': user_form, 'registered': registered}, context)
 	
 def generateNewUser():
 	username=""

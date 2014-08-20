@@ -17,7 +17,7 @@
 				<div class="panel-body">
 					<ol>
 					  <li>Ensure that you are using the Firefox web browser, if you do not have Firefox installed then download and install it from <a href="https://www.mozilla.org/en-GB/firefox/new/" target="_blank">here</a>.</li>
-					  <li>Download the Firefox extension from <a href="">here</a>.</li>
+					  <li>Download the Firefox extension from <a href="media/password_advisor.xpi">here</a>.</li>
 					  <li>Install the extension by dragging the password_advisor.xpi file into the browser. Alternatively open the file from the browser (windows: ctrl + o; mac: command+ o)</li>
 					  <li>When prompted on whether or not to trust the installation, click yes.</li>
 					  <li>Once installed the extension can be accessed using the lock icon at the top right hand corner.</li>
@@ -28,6 +28,7 @@
 			<div class="panel panel-default">
 				<div class="panel-heading"><strong>Tasks</strong></div>
 				<div class="panel-body">
+					{% if not completed %}
 					Start the evaluation tasks here:
 				
 					<div class="row"> 
@@ -37,6 +38,13 @@
 							</div>
 						</div>
 					</div>
+					{% else %}
+					<div class="row"> 
+						<div class="col-md-12 text-center text-success">
+							Thank you for completing all of the evaluation tasks. Please complete the evaluation questionnaire below.
+						</div>
+					</div>
+					{% endif %}
 				</div>
 			</div>
 			

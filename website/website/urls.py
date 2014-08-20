@@ -14,10 +14,23 @@ urlpatterns = patterns('',
 	url(r'^(?P<username>\w+)/task2/$', views.task2),
 	url(r'^(?P<username>\w+)/task3/$', views.task3),
 	url(r'^(?P<username>\w+)/task4/$', views.task4),
-	url(r'^completed/$', views.index),
-	url(r'^(?P<username>\w+)/$', views.index),
+	url(r'^completed/$', views.indexCompleted),
 
     # Admin
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
 )
+
+if settings.DEBUG:
+    urlpatterns += patterns(
+        'django.views.static',
+        (r'media/(?P<path>.*)',
+        'serve',
+        {'document_root': settings.MEDIA_ROOT}), )
+
+if not settings.DEBUG:
+    urlpatterns += patterns(
+        'django.views.static',
+        (r'media/(?P<path>.*)',
+        'serve',
+        {'document_root': settings.MEDIA_ROOT}), )

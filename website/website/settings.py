@@ -9,8 +9,6 @@ DATABASE_PATH = os.path.join(PROJECT_PATH, 'Database.db')
 MEDIA_PATH = os.path.join(PROJECT_PATH,'media')
 MEDIA_UPLOAD = "user_uploads"
 
-LOGIN_URL = '/ciderseeker/login/'
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 

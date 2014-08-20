@@ -13,7 +13,10 @@
 				<div class="panel panel-default">
 					<div class="panel-heading"><strong>Scenario - Task 2</strong></div>
 					<div class="panel-body">
-						This website for which you are creating a new password is one which allows financial transactions to occur. An example of such a website would be Amazon or ebay.com. The website allows you to store your credit card details, billing address, e-mail address, and phone number as part of their delivery service.
+						<p>This website for which you are creating a new password is one which allows financial transactions to occur. An example of such a website would be Amazon or ebay.com. The website allows you to store your credit card details, billing address, e-mail address, and phone number as part of their delivery service. </p>
+						<ul class="list-group">
+						  <li class="list-group-item list-group-item-danger">Please do not use any of your existing passwords to complete this task.</li>
+						</ul>
 					</div>
 				</div>
 				<div class="panel panel-default">
@@ -25,7 +28,7 @@
 							<button type="button" id="task2Button" class="btn btn-primary">Task 2</button>
 							<a href="/ciderseeker/">Return to the homepage.</a><br />
 					{% else %}
-						<form class="form-horizontal" id="task1_form" method="post" action="/task1/"
+						<form class="form-horizontal" id="task1_form" method="post" action="../task2/"
 							  enctype="multipart/form-data">
 
 						{% csrf_token %}
@@ -38,11 +41,20 @@
 							<fieldset>
 								{% for field in form.visible_fields %}
 									<div class="form-group">
-										<label class="col-lg-2 control-label">{{ field.help_text }}</label>
-										<div class="col-lg-10">
-											{{ field }}
-											{{field.errors}}
-										</div>
+										{% if field.name == form.choice.name %}
+											<label class="col-md-8 control-label">{{ field.help_text }}</label>
+											<div class="col-md-offset-1 col-md-10">
+												{{ field }}
+												{{field.errors}}
+											</div>
+										{% else %}
+											<label class="col-md-2 control-label">{{ field.help_text }}</label>
+											<div class="col-md-10">
+												{{ field }}
+												{{field.errors}}
+											</div>
+										{% endif %}
+										
 									</div>
 								{% endfor %}
 							</fieldset>

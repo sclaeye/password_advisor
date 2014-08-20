@@ -2,16 +2,16 @@ from website.models import *
 from django.contrib import admin
 
 class Task1Admin(admin.ModelAdmin):
-    list_display = ('username', 'password' )
+    list_display = ('username', 'password', 'choice' )
 
 class Task2Admin(admin.ModelAdmin):
-    list_display = ('username', 'password' )
+    list_display = ('username', 'password', 'choice' )
 
 class Task3Admin(admin.ModelAdmin):
-    list_display = ('username', 'password' )
+    list_display = ('username', 'password', 'choice' )
 
 class Task4Admin(admin.ModelAdmin):
-    list_display = ('username', 'password' )
+    list_display = ('username', 'password', 'choice' )
 
 
 admin.site.register(Task1, Task1Admin)
