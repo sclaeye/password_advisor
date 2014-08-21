@@ -538,7 +538,8 @@ function generateAdvice(){
 	var dataVal = $('input[name="optionsRadios1"]:checked').val();
 	var freqVal = $('input[name="optionsRadios2"]:checked').val();
 	
-	targetPassStrength = adviceMatrix[freqVal][dataVal];
+	console.log("freqval: "+freqVal);
+	targetPassStrength = adviceMatrix[dataVal][freqVal];
 	
 	$('#adviceStrength').empty();
 	$('#adviceStrength').append("<ul id='strengthList'></ul>");
@@ -604,7 +605,8 @@ function createAdviceMatrix(){
 	adviceMatrix.push(new Array()); //col 4
 	adviceMatrix.push(new Array()); //col 5
 	//very strong = 1, very weak =4;
-	//col 1
+	//adviceMatrix[dataVal][freqVal];
+	// 1
 	adviceMatrix[0][0]= 1;
  	adviceMatrix[0][1]= 1;
  	adviceMatrix[0][2]= 1;
