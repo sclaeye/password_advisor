@@ -49,7 +49,7 @@ $("#homeButton").click(function() {
 	
 	//reset password field and clear the password meter
 	$("#inputPassword").val("");
-	updateProgress(0);
+	updateProgress(calculateStrength());
 });
 
 //Allows the user to step back by 1 in the navigation order
